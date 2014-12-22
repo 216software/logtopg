@@ -2,6 +2,7 @@
 
 import psycopg2
 import logging
+import textwrap
 
 import pkg_resources
 
@@ -9,14 +10,14 @@ log = logging.getLogger(__name__)
 
 class PGHandler(logging.Handler):
 
-    def __init__(self, logtablename, params):
+    def __init__(self, log_table_name, params):
 
         if not params:
             raise Exception("No database where to log ☻")
 
         logging.Handler.__init__(self)
 
-        self.logtablename = logtablename
+        self.log_table_name = log_table_name
 
         self._database = params['database']
         self._host = params['host']
@@ -27,18 +28,34 @@ class PGHandler(logging.Handler):
         self.create_table_sql = None
         self.insert_row_sql = None
 
-    def maybe_create_table(self):
-
-        create_table_sql = self.get_create_table_sql()
+    def check_if_log_table_exists(self):
 
         pgconn = self.get_pgconn()
 
-        pgconn.cursor().execute(create_table_sql)
+        cursor = pgconn.cursor()
 
-        pgconn.commit()
+        cursor.execute("""
+            select exists(
+                select *
+                from information_schema.tables
+                where table_name = %s)
+            """, [self.log_table_name])
 
-        log.info("Just ran the SQL to create a table.")
+        return cursor.fetchone()[0]
 
+    def maybe_create_table(self):
+
+        if not self.check_if_log_table_exists():
+
+            create_table_sql = self.get_create_table_sql()
+
+            pgconn = self.get_pgconn()
+
+            pgconn.cursor().execute(create_table_sql)
+
+            pgconn.commit()
+
+            log.info("Created log table {0}.".format(self.log_table_name))
 
     def get_pgconn(self):
 
@@ -55,7 +72,8 @@ class PGHandler(logging.Handler):
             user = self._user,
             password = self._password)
 
-        log.info("Just made a database connection: {0}.".format(self.pgconn))
+        log.info("Just made a database connection: {0}.".format(
+            self.pgconn))
 
     def get_create_table_sql(self):
 
@@ -64,7 +82,7 @@ class PGHandler(logging.Handler):
             self.create_table_sql = \
             pkg_resources.resource_string(
                 "logtopostgresql", "createtable.sql")\
-            .format(self.logtablename)
+            .format(self.log_table_name)
 
         return self.create_table_sql
 
@@ -75,7 +93,7 @@ class PGHandler(logging.Handler):
             self.insert_row_sql = \
             pkg_resources.resource_string(
                 "logtopostgresql", "insertrow.sql")\
-            .format(self.logtablename)
+            .format(self.log_table_name)
 
         return self.insert_row_sql
 

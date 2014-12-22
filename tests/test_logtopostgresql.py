@@ -10,6 +10,11 @@ import psycopg2
 
 class Test1(unittest.TestCase):
 
+    """
+    This depends on a real postgresql database.  I'll create a table and
+    then drop it.
+    """
+
     db_credentials = {
         "database":"logtopg",
         "host":"localhost",
@@ -22,7 +27,7 @@ class Test1(unittest.TestCase):
             'pg': {
                 'class': 'logtopostgresql.PGHandler',
                 'level': 'DEBUG',
-                'logtablename': 'logtopg_tests',
+                'log_table_name': 'logtopg_tests',
 
                 # These need to be correct, so you'll likely need to
                 # change them.
@@ -35,6 +40,8 @@ class Test1(unittest.TestCase):
 
         'version': 1})
 
+    log_table_name = d["handlers"]["pg"]["log_table_name"]
+
     def test_1(self):
 
         """
@@ -42,16 +49,8 @@ class Test1(unittest.TestCase):
         """
 
         ltpg = logtopostgresql.PGHandler(
-            "boguslogs",
-
-            # You need to set these to whatever your test database
-            # is.  Read the README for example code on setting up a
-            # database.
-            dict(
-                database="logtopg",
-                host="localhost",
-                user="logtopg",
-                password="l0gt0pg"))
+            self.log_table_name,
+            self.db_credentials)
 
         self.assertIsNone(ltpg.create_table_sql)
 
@@ -73,15 +72,8 @@ class Test1(unittest.TestCase):
         """
 
         ltpg = logtopostgresql.PGHandler(
-            "boguslogs",
-
-            # You will need to set these to whatever your test database
-            # is
-            dict(
-                database="logtopg",
-                host="localhost",
-                user="logtopg",
-                password="l0gt0pg"))
+            self.log_table_name,
+            self.db_credentials)
 
         self.assertIsNone(ltpg.pgconn)
 
@@ -101,15 +93,8 @@ class Test1(unittest.TestCase):
         """
 
         ltpg = logtopostgresql.PGHandler(
-            "test_3_log_table",
-
-            # You will need to set these to whatever your test database
-            # is
-            dict(
-                database="logtopg",
-                host="localhost",
-                user="logtopg",
-                password="l0gt0pg"))
+            self.log_table_name,
+            self.db_credentials)
 
         ltpg.maybe_create_table()
 
@@ -121,7 +106,7 @@ class Test1(unittest.TestCase):
                 select *
                 from information_schema.tables
                 where table_name = %s)
-            """, ["test_3_log_table"])
+            """, [self.log_table_name])
 
         row = cursor.fetchone()
 
@@ -145,7 +130,6 @@ class Test1(unittest.TestCase):
 
         log = logging.getLogger("logtopostgresql.tests")
 
-
         log.debug("debug!")
         log.info("info!")
         log.warn("warn!")
@@ -159,19 +143,19 @@ class Test1(unittest.TestCase):
 
         cursor = pgconn.cursor()
 
-        log_table_name = self.d["handlers"]["pg"]["logtablename"]
 
         cursor.execute(
             """
             select *
             from {}
             where process = %s
-            """.format(log_table_name), [os.getpid()])
+            """.format(self.log_table_name), [os.getpid()])
 
         # There should be 5 logs in the database with this process's ID.
         self.assertEqual(cursor.rowcount, 5)
 
         pgconn.rollback()
+
 
     def test_5(self):
 
@@ -191,17 +175,13 @@ class Test1(unittest.TestCase):
 
 def tearDownModule():
 
-    # TODO: define all these credentials once and then reuse them.
-    pgconn = psycopg2.connect(
-        database=Test1.db_credentials["database"],
-        host=Test1.db_credentials["host"],
-        user=Test1.db_credentials["user"],
-        password=Test1.db_credentials["password"]
-    )
+    pgconn = psycopg2.connect(**Test1.db_credentials)
 
     cursor = pgconn.cursor()
 
-    cursor.execute("drop table if exists logtopg_tests")
+    cursor.execute(
+        "drop table if exists {}".format(
+            Test1.log_table_name))
 
     pgconn.commit()
 

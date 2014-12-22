@@ -2,27 +2,77 @@
 Log to Postgresql
 +++++++++++++++++
 
+Install
+=======
+
+Grab the code with pip::
+
+    $ pip install logtopg
+
+But you also have to install the ltree contrib module into your
+database::
+
+    $ sudo -u postgres psql -c "create extension ltree";
+
+Try it out
+==========
+
+Here's an example script::
+
+    import logging
+    import logging.config
+
+    log = logging.getLogger("logtopostgresql.example")
+
+    if __name__ == "__main__":
+
+        # These need to be correct, so you'll likely need to change them.
+        db_credentials = {
+            "database":"logtopg",
+            "host":"localhost",
+            "user":"logtopg",
+            "password":"l0gt0pg"}
+
+        d = dict({
+            'disable_existing_loggers': False,
+
+            'handlers': {
+
+                'pg': {
+                    'class': 'logtopostgresql.PGHandler',
+                    'level': 'DEBUG',
+                    'log_table_name': 'logtopostgresql_example',
+
+                    'params': db_credentials},
+
+                "console": {
+                    "class": "logging.StreamHandler",
+                    "level": "DEBUG"
+                }},
+
+            'root': {
+                'handlers': ["console", 'pg'],
+                'level': 'DEBUG'},
+
+            'version': 1})
+
+        logging.config.dictConfig(d)
+
+        log.debug("debug!")
+        log.info("info!")
+        log.warn("warn!")
+        log.error("error!")
+        log.critical("critical!")
+
+
+Run the tests
+=============
+
 Create the test user and database::
 
     $ sudo -u postgres createuser --pwprompt logtopg
     $ sudo -u postgres createdb --owner logtopg logtopg
     $ sudo -u postgres psql -c "create extension ltree";
-
-Add to your dictConfig::
-
-    'handlers': {
-        'pg': {
-            'class': 'logtopostgresql.PGHandler',
-            'level': 'DEBUG',
-            'logtablename': 'test_4_logs',
-
-            'params': {
-                'database': "logtopg",
-                'host': "localhost",
-                'user': "logtopg",
-                'password': "l0gt0pg"}
-        }},
-
 
 
 .. vim: set syntax=rst:
