@@ -5,31 +5,27 @@ import logging
 
 import pkg_resources
 
-# Started this code after reading http://stackoverflow.com/questions/20354321/is-this-postgresql-logging-handler-correct
-
-log = logging.getLogger("logtopostgresql")
+log = logging.getLogger(__name__)
 
 class PGHandler(logging.Handler):
-
-    create_table_sql = None
-
-    insert_row_sql = None
-
-    pgconn = None
 
     def __init__(self, logtablename, params):
 
         if not params:
             raise Exception("No database where to log ☻")
 
+        logging.Handler.__init__(self)
+
         self.logtablename = logtablename
 
-        self.__database = params['database']
-        self.__host = params['host']
-        self.__user = params['user']
-        self.__password = params['password']
+        self._database = params['database']
+        self._host = params['host']
+        self._user = params['user']
+        self._password = params['password']
 
-        logging.Handler.__init__(self)
+        self.pgconn = None
+        self.create_table_sql = None
+        self.insert_row_sql = None
 
     def maybe_create_table(self):
 
@@ -53,17 +49,19 @@ class PGHandler(logging.Handler):
 
     def make_pgconn(self):
 
-        self.__class__.pgconn = psycopg2.connect(
-            database=self.__database,
-            host = self.__host,
-            user = self.__user,
-            password = self.__password)
+        self.pgconn = psycopg2.connect(
+            database=self._database,
+            host = self._host,
+            user = self._user,
+            password = self._password)
+
+        log.info("Just made a database connection: {0}.".format(self.pgconn))
 
     def get_create_table_sql(self):
 
         if not self.create_table_sql:
 
-            self.__class__.create_table_sql = \
+            self.create_table_sql = \
             pkg_resources.resource_string(
                 "logtopostgresql", "createtable.sql")\
             .format(self.logtablename)
@@ -74,7 +72,7 @@ class PGHandler(logging.Handler):
 
         if not self.insert_row_sql:
 
-            self.__class__.insert_row_sql = \
+            self.insert_row_sql = \
             pkg_resources.resource_string(
                 "logtopostgresql", "insertrow.sql")\
             .format(self.logtablename)
@@ -85,9 +83,6 @@ class PGHandler(logging.Handler):
     def emit(self, record):
 
         self.format(record)
-
-        print("record after formatting")
-        pprint.pprint(record.__dict__)
 
         if record.exc_info:
             record.exc_text = logging._defaultFormatter.formatException(record.exc_info)

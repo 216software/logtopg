@@ -10,6 +10,18 @@ Create the test user and database::
 
 Add to your dictConfig::
 
+    'handlers': {
+        'pg': {
+            'class': 'logtopostgresql.PGHandler',
+            'level': 'DEBUG',
+            'logtablename': 'test_4_logs',
+
+            'params': {
+                'database': "logtopg",
+                'host': "localhost",
+                'user': "logtopg",
+                'password': "l0gt0pg"}
+        }},
 
 
 
