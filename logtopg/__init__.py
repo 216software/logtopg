@@ -81,7 +81,7 @@ class PGHandler(logging.Handler):
 
             self.create_table_sql = \
             pkg_resources.resource_string(
-                "logtopostgresql", "createtable.sql")\
+                "logtopg", "createtable.sql")\
             .format(self.log_table_name)
 
         return self.create_table_sql
@@ -92,7 +92,7 @@ class PGHandler(logging.Handler):
 
             self.insert_row_sql = \
             pkg_resources.resource_string(
-                "logtopostgresql", "insertrow.sql")\
+                "logtopg", "insertrow.sql")\
             .format(self.log_table_name)
 
         return self.insert_row_sql

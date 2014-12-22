@@ -5,7 +5,7 @@ import logging.config
 import os
 import unittest
 
-import logtopostgresql
+import logtopg
 import psycopg2
 
 class Test1(unittest.TestCase):
@@ -25,7 +25,7 @@ class Test1(unittest.TestCase):
 
         'handlers': {
             'pg': {
-                'class': 'logtopostgresql.PGHandler',
+                'class': 'logtopg.PGHandler',
                 'level': 'DEBUG',
                 'log_table_name': 'logtopg_tests',
 
@@ -48,7 +48,7 @@ class Test1(unittest.TestCase):
         Verify we only read sql files once each.
         """
 
-        ltpg = logtopostgresql.PGHandler(
+        ltpg = logtopg.PGHandler(
             self.log_table_name,
             self.db_credentials)
 
@@ -71,7 +71,7 @@ class Test1(unittest.TestCase):
         Verify we make only one database connection in an instance.
         """
 
-        ltpg = logtopostgresql.PGHandler(
+        ltpg = logtopg.PGHandler(
             self.log_table_name,
             self.db_credentials)
 
@@ -92,7 +92,7 @@ class Test1(unittest.TestCase):
         Verify we can create the log table.
         """
 
-        ltpg = logtopostgresql.PGHandler(
+        ltpg = logtopg.PGHandler(
             self.log_table_name,
             self.db_credentials)
 
@@ -128,7 +128,7 @@ class Test1(unittest.TestCase):
 
         logging.config.dictConfig(self.d)
 
-        log = logging.getLogger("logtopostgresql.tests")
+        log = logging.getLogger("logtopg.tests")
 
         log.debug("debug!")
         log.info("info!")
@@ -166,10 +166,10 @@ class Test1(unittest.TestCase):
 
         logging.config.dictConfig(self.d)
 
-        log1 = logging.getLogger("logtopostgresql.tests.a")
+        log1 = logging.getLogger("logtopg.tests.a")
         log1.debug("trying this guy out")
 
-        log2 = logging.getLogger("logtopostgresql.tests.b")
+        log2 = logging.getLogger("logtopg.tests.b")
         log2.debug("trying this guy out")
 
 

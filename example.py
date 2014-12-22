@@ -3,7 +3,7 @@
 import logging
 import logging.config
 
-log = logging.getLogger("logtopostgresql.example")
+log = logging.getLogger("logtopg.example")
 
 if __name__ == "__main__":
 
@@ -20,9 +20,9 @@ if __name__ == "__main__":
         'handlers': {
 
             'pg': {
-                'class': 'logtopostgresql.PGHandler',
+                'class': 'logtopg.PGHandler',
                 'level': 'DEBUG',
-                'log_table_name': 'logtopostgresql_example',
+                'log_table_name': 'logtopg_example',
 
                 'params': db_credentials},
 

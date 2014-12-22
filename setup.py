@@ -3,9 +3,9 @@
 from setuptools import setup
 
 setup(
-    name="LogToPostgres",
+    name="LogToPG",
     version="0.0.1",
-    packages=["logtopostgresql"],
+    packages=["logtopg"],
     author="216 Software, LLC",
     author_email="info@216software.com",
     license="BSD License",
