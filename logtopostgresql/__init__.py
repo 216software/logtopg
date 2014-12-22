@@ -5,32 +5,16 @@ import logging
 import textwrap
 import time
 
+import pkg_resources
+
 # Ganked from http://stackoverflow.com/questions/20354321/is-this-postgresql-logging-handler-correct
 
 log = logging.getLogger("logtopostgresql")
 
 class psqlHandler(logging.Handler):
 
-    initial_sql = textwrap.dedent("""
-        CREATE TABLE IF NOT EXISTS log(
-            Created text,
-            Name text,
-            LogLevel int,
-            LogLevelName text,
-            Message text,
-            Args text,
-            Module text,
-            FuncName text,
-            LineNo int,
-            Exception text,
-            Process int,
-            Thread text,
-            ThreadName text
-        )
-        """)
-
     insertion_sql = textwrap.dedent("""
-        INSERT INTO log(
+        INSERT INTO {} (
             Created,
             Name,
             LogLevel,
@@ -60,73 +44,64 @@ class psqlHandler(logging.Handler):
         """)
 
     def connect(self):
-        try:
-            self.__connect = psycopg2.connect(
-                database=self.__database,
-                host = self.__host,
-                user = self.__user,
-                password = self.__password,
-                sslmode="disable")
 
-            return True
-        except:
-            return False
+        self.pgconn = psycopg2.connect(
+            database=self.__database,
+            host = self.__host,
+            user = self.__user,
+            password = self.__password)
 
-    def __init__(self, params):
+    def get_create_table_sql(self):
+
+        return pkg_resources.resource_string(
+            "logtopostgresql", "createtable.sql").format(
+                self.logtablename)
+
+    def __init__(self, logtablename, params):
 
         if not params:
-            raise Exception ("No database where to log ☻")
+            raise Exception("No database where to log ☻")
+
+        self.logtablename = logtablename
 
         self.__database = params['database']
         self.__host = params['host']
         self.__user = params['user']
         self.__password = params['password']
 
-        self.__connect = None
-
-        if not self.connect():
-            raise Exception ("Database connection error, no logging ☻")
+        self.connect()
 
         logging.Handler.__init__(self)
 
-        self.__connect.cursor().execute(psqlHandler.initial_sql)
-        self.__connect.commit()
-        self.__connect.cursor().close()
+        create_table_sql = self.get_create_table_sql()
+
+        self.pgconn.cursor().execute(create_table_sql)
+
+        self.pgconn.commit()
 
         log.info("Just ran the SQL to create a table.")
-
 
     def emit(self, record):
 
         # Use default formatting:
         self.format(record)
 
+        # print(record.created)
+        # print(type(record.created))
+
         if record.exc_info:
             record.exc_text = logging._defaultFormatter.formatException(record.exc_info)
+
         else:
             record.exc_text = ""
 
-        # Insert log record:
-        try:
-            cur = self.__connect.cursor()
-        except:
-            self.connect()
-            cur = self.__connect.cursor()
+        cur = self.pgconn.cursor()
 
-        cur.execute(psqlHandler.insertion_sql, record.__dict__)
+        cur.execute(
+            psqlHandler.insertion_sql.format(
+                self.logtablename),
+                record.__dict__)
 
-        self.__connect.commit()
-        self.__connect.cursor().close()
+        self.pgconn.commit()
+        self.pgconn.cursor().close()
 
-if __name__ == "__main__":
-
-    myh = psqlHandler({'host':"localhost", 'user':"test",
-                       'password':"testpw", 'database':"test"})
-
-    l = logging.getLogger("TEST")
-    l.setLevel(logging.DEBUG)
-    l.addHandler(myh)
-
-
-    for i in xrange(1):
-        l.info("test%i"%i)

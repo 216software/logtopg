@@ -9,4 +9,5 @@ setup(
     author="216 Software, LLC",
     author_email="info@216software.com",
     license="BSD License",
+    include_package_data=True,
 )
