@@ -1,0 +1,16 @@
++++++++++++++++++
+Log to Postgresql
++++++++++++++++++
+
+Create the test user and database::
+
+    $ sudo -u postgres createuser --pwprompt logtopg
+    $ sudo -u postgres createdb --owner logtopg logtopg
+    $ sudo -u postgres psql -c "create extension ltree";
+
+Add to your dictConfig::
+
+
+
+
+.. vim: set syntax=rst:
