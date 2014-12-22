@@ -65,10 +65,19 @@ Here's an example script::
         log.critical("critical!")
 
 
-Run the tests
-=============
+Contribute to logtopg
+=====================
 
-Create the test user and database::
+Get a copy of the code::
+
+    $ git clone --origin github https://github.com/216software/logtopg.git
+
+Install it like this::
+
+    $ cd logtopg
+    $ pip install -e . -r requirements.txt
+
+Create test user and test database::
 
     $ sudo -u postgres createuser --pwprompt logtopg
     $ sudo -u postgres createdb --owner logtopg logtopg
@@ -77,6 +86,8 @@ Create the test user and database::
 Then run the tests like this::
 
     $ python logtopg/tests
+
+
 
 
 .. vim: set syntax=rst:
