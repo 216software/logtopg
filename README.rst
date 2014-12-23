@@ -1,5 +1,5 @@
 +++++++++++++++++
-Log to Postgresql
+Log to PostgreSQL
 +++++++++++++++++
 
 Install
@@ -75,7 +75,7 @@ Get a copy of the code::
 Install it like this::
 
     $ cd logtopg
-    $ pip install -e . -r requirements.txt
+    $ pip install -e .
 
 Create test user and test database::
 
@@ -85,7 +85,14 @@ Create test user and test database::
 
 Then run the tests like this::
 
-    $ python logtopg/tests
+    $ python tests/test_logtopg.py
+    .....
+    ----------------------------------------------------------------------
+    Ran 5 tests in 0.465s
+
+    OK
+
+And hopefully stuff works!
 
 
 

@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="LogToPG",
-    version="0.0.4",
+    version="0.0.5",
     description="Python logging handler that stores logs in postgresql",
     url="https://github.com/216software/logtopg/",
     packages=["logtopg"],
