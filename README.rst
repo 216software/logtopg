@@ -89,16 +89,40 @@ Create test user and test database::
 
 Then run the tests like this::
 
-    $ python tests/test_logtopg.py
+    $ python setup.py --quiet test
     .....
     ----------------------------------------------------------------------
-    Ran 5 tests in 0.465s
+    Ran 5 tests in 0.379s
 
     OK
 
-And hopefully stuff works!
+Hopefully it works!
 
 
+Stuff to do
+===========
+
+*   Look if there are any other columns we could store.  Can we look up
+    process names for a process ID and store the name?
+
+*   Add indexes on columns that are likely to be used in where-clauses,
+    such as:
+
+        *   log name (the ltree column)
+        *   process ID
+        *   inserted
+        *   log level (DEBUG, INFO, WARN, ERROR, CRITICAL)
+
+*   Add a trigger to set the updated column if a row is ever updated.
+
+*   Write some documentation showing how to use the ltree column type to
+    get logs just for a part of an application.
+
+*   Do some load-testing with tons of connected processes and tons of
+    logging messages.  Make sure that logging doesn't compete with real
+    application work for database resources.  Is there a way to say,
+    "Hey postgresql, take your time with this stuff, and deal with other
+    stuff first!"
 
 
 .. vim: set syntax=rst:

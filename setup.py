@@ -12,7 +12,7 @@ setup(
     version="0.0.5",
     description="Python logging handler that stores logs in postgresql",
     url="https://github.com/216software/logtopg/",
-    packages=["logtopg"],
+    packages=["logtopg", "logtopg.tests"],
     author="216 Software, LLC",
     author_email="info@216software.com",
     license="BSD License",
