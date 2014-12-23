@@ -80,8 +80,8 @@ class PGHandler(logging.Handler):
         if not self.create_table_sql:
 
             self.create_table_sql = \
-            pkg_resources.resource_string(
-                "logtopg", "createtable.sql")\
+            str(pkg_resources.resource_string(
+                "logtopg", "createtable.sql"))\
             .format(self.log_table_name)
 
         return self.create_table_sql
@@ -91,8 +91,8 @@ class PGHandler(logging.Handler):
         if not self.insert_row_sql:
 
             self.insert_row_sql = \
-            pkg_resources.resource_string(
-                "logtopg", "insertrow.sql")\
+            str(pkg_resources.resource_string(
+                "logtopg", "insertrow.sql"))\
             .format(self.log_table_name)
 
         return self.insert_row_sql
