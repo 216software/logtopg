@@ -1,4 +1,4 @@
-insert into {} (
+insert into {0} (
     created,
     name,
     loglevel,

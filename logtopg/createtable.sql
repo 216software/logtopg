@@ -1,4 +1,4 @@
-create table if not exists {} (
+create table if not exists {0} (
     created text,
     name ltree,
     loglevel int,
