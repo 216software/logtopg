@@ -22,6 +22,6 @@ setup(
         'psycopg2',
     ],
 
-    test_suite="tests",
+    test_suite="logtopg.tests",
     use_2to3=True,
 )
