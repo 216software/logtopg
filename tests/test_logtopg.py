@@ -180,7 +180,7 @@ def tearDownModule():
     cursor = pgconn.cursor()
 
     cursor.execute(
-        "drop table if exists {}".format(
+        "drop table if exists {0}".format(
             Test1.log_table_name))
 
     pgconn.commit()
