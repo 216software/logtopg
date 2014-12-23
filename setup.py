@@ -1,5 +1,10 @@
 # vim: set expandtab ts=4 sw=4 filetype=python fileencoding=utf8:
 
+import sys
+
+if sys.version_info < (2, 7):
+    raise Exception("sorry, this needs at least python 2.7!")
+
 from setuptools import setup
 
 setup(
