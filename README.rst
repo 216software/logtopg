@@ -21,7 +21,7 @@ database::
 Try it out
 ==========
 
-Here's an example script::
+The script below (also available here_) shows how to set up this logging handler and log to it::
 
     import logging
     import logging.config
@@ -68,6 +68,7 @@ Here's an example script::
         log.error("error!")
         log.critical("critical!")
 
+.. _here: https://github.com/216software/logtopg/blob/master/docs/example.py
 
 Contribute to logtopg
 =====================
