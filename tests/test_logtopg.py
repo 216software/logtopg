@@ -52,15 +52,15 @@ class Test1(unittest.TestCase):
             self.log_table_name,
             self.db_credentials)
 
-        self.assertIsNone(ltpg.create_table_sql)
+        self.assertTrue(ltpg.create_table_sql is None)
 
         s1 = ltpg.get_create_table_sql()
 
-        self.assertIsInstance(ltpg.create_table_sql, str)
+        self.assertTrue(isinstance(ltpg.create_table_sql, str))
 
         s2 = ltpg.get_create_table_sql()
 
-        self.assertIs(s1, s2)
+        self.assertTrue(s1 is s2)
 
         ltpg.get_insert_row_sql()
 
@@ -75,7 +75,7 @@ class Test1(unittest.TestCase):
             self.log_table_name,
             self.db_credentials)
 
-        self.assertIsNone(ltpg.pgconn)
+        self.assertTrue(ltpg.pgconn is None)
 
         conn1 = ltpg.get_pgconn()
 
@@ -83,7 +83,7 @@ class Test1(unittest.TestCase):
 
         conn2 = ltpg.get_pgconn()
 
-        self.assertIs(conn1, conn2)
+        self.assertTrue(conn1 is conn2)
 
 
     def test_3(self):
