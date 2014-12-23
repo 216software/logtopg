@@ -2,7 +2,8 @@
 Log to PostgreSQL
 +++++++++++++++++
 
-.. image: https://travis-ci.org/216software/logtopg.svg?branch=master
+.. image:: https://travis-ci.org/216software/logtopg.svg?branch=master
+   :target: https://travis-ci.org/216software/logtopg
 
 
 Install

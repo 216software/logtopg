@@ -56,7 +56,7 @@ class Test1(unittest.TestCase):
 
         s1 = ltpg.get_create_table_sql()
 
-        self.assertTrue(isinstance(ltpg.create_table_sql, str))
+        self.assertTrue(isinstance(ltpg.create_table_sql, basestring))
 
         s2 = ltpg.get_create_table_sql()
 
