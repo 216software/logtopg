@@ -103,6 +103,9 @@ Hopefully it works!
 Stuff to do
 ===========
 
+*   Replace all the text columns with data types that better match the
+    underlying data.
+
 *   Fill out classifiers in setup.py.
 
 *   Look if there are any other columns we could store.  Can we look up
