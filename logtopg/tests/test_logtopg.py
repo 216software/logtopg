@@ -132,7 +132,7 @@ class Test1(unittest.TestCase):
 
         log.debug("debug!")
         log.info("info!")
-        log.warn("warn!")
+        log.warning("warning!")
         log.error("error!")
         log.critical("critical!")
 
@@ -142,7 +142,6 @@ class Test1(unittest.TestCase):
         pgconn = log.root.handlers[0].pgconn
 
         cursor = pgconn.cursor()
-
 
         cursor.execute(
             """
