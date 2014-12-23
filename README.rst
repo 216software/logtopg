@@ -81,7 +81,7 @@ Create test user and test database::
 
     $ sudo -u postgres createuser --pwprompt logtopg
     $ sudo -u postgres createdb --owner logtopg logtopg
-    $ sudo -u postgres psql -c "create extension ltree";
+    $ sudo -u postgres psql -c "create extension ltree;"
 
 Then run the tests like this::
 

@@ -15,3 +15,11 @@ install:
 
 # command to run tests
 script: nosetests
+
+addons:
+    postgresql: "9.3"
+
+before_script:
+  - psql -c "create user logtopg with password 'l0gt0pg';" -U postgres
+  - psql -c "create database logtopg with owner logtopg;" -U postgres
+  - psql -c "create extension ltree;" -U postgres
