@@ -7,7 +7,7 @@ setup(
     version="0.0.5",
     description="Python logging handler that stores logs in postgresql",
     url="https://github.com/216software/logtopg/",
-    packages=["logtopg", "logtopg.tests"],
+    packages=["logtopg"],
     author="216 Software, LLC",
     author_email="info@216software.com",
     license="BSD License",
@@ -17,6 +17,6 @@ setup(
         'psycopg2',
     ],
 
-    test_suite="logtopg.tests",
+    test_suite="tests",
     use_2to3=True,
 )

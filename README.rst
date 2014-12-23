@@ -16,7 +16,7 @@ Grab the code with pip::
 But you also have to install the ltree contrib module into your
 database::
 
-    $ sudo -u postgres psql -c "create extension ltree";
+    $ sudo -u postgres psql -c "create extension ltree;"
 
 Try it out
 ==========
