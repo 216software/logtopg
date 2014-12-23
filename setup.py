@@ -15,5 +15,8 @@ setup(
 
     install_requires=[
         'psycopg2',
-    ]
+    ],
+
+    test_suite="logtopg.tests",
+    use_2to3=True,
 )
