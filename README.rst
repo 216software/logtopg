@@ -21,14 +21,14 @@ database::
 Try it out
 ==========
 
-The code below shows how to set configure your logging to use this
-handler.  The code is also in the docs/example.py file here_.
+The code in `docs/example.py`_ shows how to set configure your logging
+to use this handler.
 
 .. include:: docs/example.py
     :number-lines:
     :code: python
 
-.. _here: https://github.com/216software/logtopg/blob/master/docs/example.py
+.. _`docs/example.py`: https://github.com/216software/logtopg/blob/master/docs/example.py
 
 Contribute to logtopg
 =====================
