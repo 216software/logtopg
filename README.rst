@@ -3,7 +3,7 @@ Log to PostgreSQL
 +++++++++++++++++
 
 .. image:: https://travis-ci.org/216software/logtopg.svg?branch=master
-   :target: https://travis-ci.org/216software/logtopg
+    :target: https://travis-ci.org/216software/logtopg
 
 
 Install
@@ -21,52 +21,12 @@ database::
 Try it out
 ==========
 
-The script below (also available here_) shows how to set up this logging handler and log to it::
+The code below shows how to set configure your logging to use this
+handler.  The code is also in the docs/example.py file here_.
 
-    import logging
-    import logging.config
-
-    log = logging.getLogger("logtopg.example")
-
-    if __name__ == "__main__":
-
-        # These need to be correct, so you'll likely need to change them.
-        db_credentials = {
-            "database":"logtopg",
-            "host":"localhost",
-            "user":"logtopg",
-            "password":"l0gt0pg"}
-
-        d = dict({
-            'disable_existing_loggers': False,
-
-            'handlers': {
-
-                'pg': {
-                    'class': 'logtopg.PGHandler',
-                    'level': 'DEBUG',
-                    'log_table_name': 'logtopg_example',
-
-                    'params': db_credentials},
-
-                "console": {
-                    "class": "logging.StreamHandler",
-                    "level": "DEBUG"
-                }},
-
-            'root': {
-                'handlers': ["console", 'pg'],
-                'level': 'DEBUG'},
-
-            'version': 1})
-
-        logging.config.dictConfig(d)
-
-        log.debug("debug!")
-        log.info("info!")
-        log.warn("warn!")
-        log.error("error!")
-        log.critical("critical!")
+.. include:: docs/example.py
+    :number-lines:
+    :code: python
 
 .. _here: https://github.com/216software/logtopg/blob/master/docs/example.py
 
