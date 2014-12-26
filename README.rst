@@ -21,14 +21,15 @@ database::
 Try it out
 ==========
 
-The code in `docs/example.py`_ shows how to set configure your logging
-to use this handler.
+The code in `docs/example.py`_ shows how to set up your logging configs
+with this handler.
+
+.. _`docs/example.py`: https://github.com/216software/logtopg/blob/master/docs/example.py
 
 .. include:: docs/example.py
     :number-lines:
     :code: python
 
-.. _`docs/example.py`: https://github.com/216software/logtopg/blob/master/docs/example.py
 
 Contribute to logtopg
 =====================
