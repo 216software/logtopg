@@ -171,6 +171,26 @@ class Test1(unittest.TestCase):
         log2 = logging.getLogger("logtopg.tests.b")
         log2.debug("trying this guy out")
 
+    def test_6(self):
+
+        """
+        Log an exception to the database.
+        """
+
+        logging.config.dictConfig(self.d)
+
+        log = logging.getLogger("logtopg.tests.tests_6")
+
+        try:
+
+            1/0
+
+        except Exception as ex:
+
+            log.exception(ex)
+
+        log.debug(AttributeError("This is a bogus exception"))
+
 
 def tearDownModule():
 

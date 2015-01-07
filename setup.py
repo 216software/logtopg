@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
     name="LogToPG",
-    version="0.0.5",
+    version="0.0.6",
     description="Python logging handler that stores logs in postgresql",
     url="https://github.com/216software/logtopg/",
     packages=["logtopg", "logtopg.tests"],

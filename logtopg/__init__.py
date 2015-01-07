@@ -100,6 +100,24 @@ class PGHandler(logging.Handler):
         return self.insert_row_sql
 
 
+    def build_d(self, record_dict):
+
+        return {k:v for (k, v) in record_dict.items()
+            if k in set([
+                "created",
+                "name",
+                "levelno",
+                "levelname",
+                "msg",
+                "module",
+                "funcName",
+                "lineno",
+                "exc_text",
+                "process",
+                "thread",
+                "threadName",
+                ])}
+
     def emit(self, record):
 
         self.format(record)
@@ -110,14 +128,29 @@ class PGHandler(logging.Handler):
         else:
             record.exc_text = ""
 
+        if isinstance(record.msg, Exception):
+            record.msg = str(record.msg)
+
         pgconn = self.get_pgconn()
 
         self.maybe_create_table()
 
         cursor = pgconn.cursor()
 
-        cursor.execute(
-            self.get_insert_row_sql(),
-            record.__dict__)
+        try:
 
-        pgconn.commit()
+            cursor.execute(
+                self.get_insert_row_sql(),
+                self.build_d(record.__dict__))
+
+            pgconn.commit()
+
+        except Exception as ex:
+
+            pass
+
+            # print isinstance(record.msg, Exception)
+            # print ex
+            # print record.__dict__
+            # print self.build_d(record.__dict__)
+

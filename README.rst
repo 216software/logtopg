@@ -64,6 +64,12 @@ Hopefully it works!
 Stuff to do
 ===========
 
+*   Make it easy to discover the version number in an interactive
+    session.  Research a few ways to do this and then pick the best.
+
+*   Figure out how to discover when something can't be adapted, and then
+    store a string version of it instead.
+
 *   Replace all the text columns with data types that better match the
     underlying data.
 
