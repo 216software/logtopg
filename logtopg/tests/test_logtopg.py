@@ -178,7 +178,6 @@ class Test1(unittest.TestCase):
         """
 
         logging.config.dictConfig(self.d)
-
         log = logging.getLogger("logtopg.tests.tests_6")
 
         try:
@@ -190,6 +189,25 @@ class Test1(unittest.TestCase):
             log.exception(ex)
 
         log.debug(AttributeError("This is a bogus exception"))
+
+    def test_7(self):
+
+        """
+        Log something weird to the database, where "something weird"
+        means something that can't be adapted.
+        """
+
+        logging.config.dictConfig(self.d)
+        log = logging.getLogger("logtopg.tests.tests_7")
+
+        class Unadaptable(object):
+            pass
+
+        u = Unadaptable()
+
+        log.debug("u is a {0}.".format(u))
+        log.debug(u)
+        log.debug(dict(u=u))
 
 
 def tearDownModule():

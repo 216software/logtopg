@@ -3,6 +3,8 @@
 import psycopg2
 import logging
 import textwrap
+import traceback
+import warnings
 
 import pkg_resources
 
@@ -147,10 +149,8 @@ class PGHandler(logging.Handler):
 
         except Exception as ex:
 
-            pass
+            warnings.warn(
+                "Something couldn't be logged to the database!",
+                stacklevel=4)
 
-            # print isinstance(record.msg, Exception)
-            # print ex
-            # print record.__dict__
-            # print self.build_d(record.__dict__)
-
+            traceback.print_stack(limit=10)
