@@ -154,5 +154,3 @@ class PGHandler(logging.Handler):
             warnings.warn(
                 "Something couldn't be logged to the database!",
                 stacklevel=4)
-
-            traceback.print_stack(limit=10)

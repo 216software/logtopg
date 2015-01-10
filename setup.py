@@ -5,20 +5,19 @@ import sys
 if sys.version_info < (2, 7):
     raise Exception("sorry, this needs at least python 2.7!")
 
+# Read __version__ from version.py
 with open("logtopg/version.py") as f:
     exec(f.read())
 
-# from .version import __version__
-
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
     name="LogToPG",
     version=__version__,
     description="Python logging handler that stores logs in postgresql",
     url="https://github.com/216software/logtopg/",
-    # packages=["logtopg", "logtopg.tests"],
-    packages=["logtopg"],
+    packages=find_packages(),
+
     author="216 Software, LLC",
     author_email="info@216software.com",
     license="BSD License",
@@ -28,7 +27,8 @@ setup(
         'psycopg2',
     ],
 
-    # test_suite="logtopg.tests",
-    test_suite="tests",
+    # I think that as I add new test folders, I'll need to keep adding
+    # them in here.
+    test_suite="logtopg.tests",
     use_2to3=True,
 )

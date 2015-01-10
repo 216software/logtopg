@@ -8,15 +8,6 @@ import unittest
 import logtopg
 import psycopg2
 
-# This is a patch for how python2 has a basestring, but python 3
-# doesn't.  I was using use_2to3 in setup.py to do this, but then I
-# found out tox didn't w
-try:
-    str_type = basestring
-
-except NameError:
-    str_type = str
-
 class Test1(unittest.TestCase):
 
     """
@@ -66,7 +57,6 @@ class Test1(unittest.TestCase):
         s1 = ltpg.get_create_table_sql()
 
         self.assertTrue(isinstance(ltpg.create_table_sql, basestring))
-        # self.assertTrue(isinstance(ltpg.create_table_sql, str_type))
 
         s2 = ltpg.get_create_table_sql()
 
