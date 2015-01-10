@@ -64,6 +64,9 @@ Hopefully it works!
 Stuff to do
 ===========
 
+*   Set up Circle CI to run unit tests as well as travis CI.  Maybe post
+     blog if one is vastly better than the other.
+
 *   Make it easy to discover the version number in an interactive
     session.  Research a few ways to do this and then pick the best.
 
@@ -112,5 +115,6 @@ Stuff to do
     *   tweak log table columns or indexes
     *   discuss performance issues
 
+*   Set up a readthedocs page for logtopg for that documentation.
 
 .. vim: set syntax=rst:

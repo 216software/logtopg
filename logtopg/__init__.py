@@ -8,6 +8,8 @@ import warnings
 
 import pkg_resources
 
+from logtopg.version import __version__
+
 log = logging.getLogger(__name__)
 
 class PGHandler(logging.Handler):

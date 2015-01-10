@@ -56,6 +56,8 @@ class Test1(unittest.TestCase):
 
         s1 = ltpg.get_create_table_sql()
 
+        # The use_2to3=True in setup.py will rewrite "basestring" with
+        # "string".  Pretty neat, right?
         self.assertTrue(isinstance(ltpg.create_table_sql, basestring))
 
         s2 = ltpg.get_create_table_sql()

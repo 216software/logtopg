@@ -5,14 +5,17 @@ import sys
 if sys.version_info < (2, 7):
     raise Exception("sorry, this needs at least python 2.7!")
 
+from logtopg.version import __version__
+
 from setuptools import setup
 
 setup(
     name="LogToPG",
-    version="0.0.6",
+    version=__version__,
     description="Python logging handler that stores logs in postgresql",
     url="https://github.com/216software/logtopg/",
-    packages=["logtopg", "logtopg.tests"],
+    # packages=["logtopg", "logtopg.tests"],
+    packages=["logtopg"],
     author="216 Software, LLC",
     author_email="info@216software.com",
     license="BSD License",
@@ -22,6 +25,7 @@ setup(
         'psycopg2',
     ],
 
-    test_suite="logtopg.tests",
+    # test_suite="logtopg.tests",
+    test_suite="tests",
     use_2to3=True,
 )
