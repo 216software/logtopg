@@ -5,7 +5,10 @@ import sys
 if sys.version_info < (2, 7):
     raise Exception("sorry, this needs at least python 2.7!")
 
-from logtopg.version import __version__
+with open("logtopg/version.py") as f:
+    exec(f.read())
+
+# from .version import __version__
 
 from setuptools import setup
 
