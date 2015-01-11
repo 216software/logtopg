@@ -8,6 +8,45 @@ import unittest
 import logtopg
 import psycopg2
 
+testing_dict_config = dict({
+
+    "loggers": {
+        "logtopg": {
+            "handlers": ["pg"],
+            "level": "DEBUG",
+        }
+    },
+
+    'handlers': {
+        'pg': {
+            'class': 'logtopg.PGHandler',
+            'level': 'DEBUG',
+            'log_table_name': 'logtopg_tests',
+
+            "database":"logtopg",
+            "host":"localhost",
+            "user":"logtopg",
+            "password":"l0gt0pg",
+        },
+
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "DEBUG",
+        },
+
+    },
+
+    # 'root': {
+    #     'handlers': ["console"],
+    #     'level': 'DEBUG'},
+
+    'version': 1,
+
+    # This is important!  Without it, any log instances created before
+    # you run logging.config.dictConfig(...) will be disabled.
+    'disable_existing_loggers': False,
+})
+
 class Test1(unittest.TestCase):
 
     """
@@ -15,7 +54,7 @@ class Test1(unittest.TestCase):
     then drop it.
     """
 
-    d = logtopg.example_dict_config
+    d = testing_dict_config
     log_table_name = d["handlers"]["pg"]["log_table_name"]
     database = d["handlers"]["pg"]["database"]
     user = d["handlers"]["pg"]["user"]

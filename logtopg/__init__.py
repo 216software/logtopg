@@ -162,26 +162,52 @@ class PGHandler(logging.Handler):
 
 example_dict_config = dict({
 
+    "loggers": {
+        "logtopg": {
+            # "handlers": ["pg", "console"],
+            "handlers": ["console"],
+            "level": "DEBUG",
+        }
+    },
+
     'handlers': {
         'pg': {
             'class': 'logtopg.PGHandler',
             'level': 'DEBUG',
-            'log_table_name': 'logtopg_tests',
+            'log_table_name': 'logtopg_logs',
 
             "database":"logtopg",
             "host":"localhost",
             "user":"logtopg",
             "password":"l0gt0pg",
+        },
 
-        }},
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "DEBUG",
+            "formatter": "consolefmt",
+        },
 
+    },
+
+    "formatters": {
+            "consolefmt":{
+                "format": '%(asctime)-22s [%(process)d] %(name)-30s %(lineno)-5d %(levelname)-8s %(message)s',
+            },
+    },
+
+    # Any handlers attached to root get log messages from EVERYTHING,
+    # like third-party modules, etc.
     'root': {
-        'handlers': ['pg'],
-        'level': 'DEBUG'},
+        'handlers': ["pg"],
+        'level': 'DEBUG',
+    },
 
     'version': 1,
 
     # This is important!  Without it, any log instances created before
-    # you run logging.config.dictConfig(...) will be disabled.
+    # you run logging.config.dictConfig(...) will be disabled, which
+    # means all the global log objects in all the various imported files
+    # won't do anything.
     'disable_existing_loggers': False,
 })
