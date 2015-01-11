@@ -17,8 +17,17 @@ class Test1(unittest.TestCase):
 
     d = logtopg.example_dict_config
     log_table_name = d["handlers"]["pg"]["log_table_name"]
-    db_credentials = d["handlers"]["pg"]["params"]
+    database = d["handlers"]["pg"]["database"]
+    user = d["handlers"]["pg"]["user"]
+    password = d["handlers"]["pg"]["password"]
+    host = d["handlers"]["pg"]["host"]
 
+    db_credentials = dict(
+        user=user,
+        password=password,
+        host=host,
+        database=database,
+    )
 
     def setUp(self):
 
@@ -28,7 +37,10 @@ class Test1(unittest.TestCase):
 
         self.ltpg = logtopg.PGHandler(
             self.log_table_name,
-            self.db_credentials)
+            self.user,
+            self.password,
+            self.host,
+            self.database)
 
         # Make a separate database connection to check results in
         # database.
@@ -61,7 +73,7 @@ class Test1(unittest.TestCase):
 
         ltpg = logtopg.PGHandler(
             self.log_table_name,
-            self.db_credentials)
+            **self.db_credentials)
 
         self.assertTrue(ltpg.pgconn is None)
 
@@ -82,7 +94,7 @@ class Test1(unittest.TestCase):
 
         ltpg = logtopg.PGHandler(
             self.log_table_name,
-            self.db_credentials)
+            **self.db_credentials)
 
         ltpg.maybe_create_table()
 
@@ -131,8 +143,7 @@ class Test1(unittest.TestCase):
         log.critical("critical!")
 
         # Now check that those logs are actually in the database.
-        pgconn = log.root.handlers[0].get_pgconn()
-        cursor = pgconn.cursor()
+        cursor = self.test_pgconn.cursor()
 
         cursor.execute(
             """
@@ -141,12 +152,9 @@ class Test1(unittest.TestCase):
             where process = %s
             """.format(self.log_table_name), [os.getpid()])
 
-        for row in cursor:
-            print row[0]
-
         counted_rows = cursor.rowcount
 
-        pgconn.rollback()
+        self.test_pgconn.rollback()
 
         # There should be 7 logs in the database with this process's ID.
         # Those 7 are the five above and the two connection logs.
@@ -190,8 +198,7 @@ class Test1(unittest.TestCase):
     def test_7(self):
 
         """
-        Log something weird to the database, where "something weird"
-        means something that can't be adapted.
+        Log something that can't be adapted to the database.
         """
 
         logging.config.dictConfig(self.d)

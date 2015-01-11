@@ -4,6 +4,7 @@ import psycopg2
 import logging
 import textwrap
 import traceback
+
 import warnings
 
 import pkg_resources
@@ -15,19 +16,16 @@ log = logging.getLogger(__name__)
 
 class PGHandler(logging.Handler):
 
-    def __init__(self, log_table_name, params):
-
-        if not params:
-            raise Exception("No database where to log ☻")
+    def __init__(self, log_table_name, user, password, host, database):
 
         logging.Handler.__init__(self)
 
         self.log_table_name = log_table_name
 
-        self._database = params['database']
-        self._host = params['host']
-        self._user = params['user']
-        self._password = params['password']
+        self.database = database
+        self.host = host
+        self.user = user
+        self.password = password
 
         self.pgconn = None
         self.create_table_sql = None
@@ -72,12 +70,14 @@ class PGHandler(logging.Handler):
     def make_pgconn(self):
 
         self.pgconn = psycopg2.connect(
-            database=self._database,
-            host = self._host,
-            user = self._user,
-            password = self._password)
+            database=self.database,
+            host = self.host,
+            user = self.user,
+            password = self.password)
 
-        log.info("Just made a database connection: {0}.".format(
+        self.pgconn.autocommit = True
+
+        log.info("Just made an autocommitting database connection: {0}.".format(
             self.pgconn))
 
     def get_create_table_sql(self):
@@ -156,8 +156,6 @@ class PGHandler(logging.Handler):
                 self.get_insert_row_sql(),
                 self.build_d(record.__dict__))
 
-            pgconn.commit()
-
         except Exception as ex:
             pass
 
@@ -170,11 +168,10 @@ example_dict_config = dict({
             'level': 'DEBUG',
             'log_table_name': 'logtopg_tests',
 
-            'params': {
-                "database":"logtopg",
-                "host":"localhost",
-                "user":"logtopg",
-                "password":"l0gt0pg"},
+            "database":"logtopg",
+            "host":"localhost",
+            "user":"logtopg",
+            "password":"l0gt0pg",
 
         }},
 
