@@ -7,6 +7,7 @@ import traceback
 import warnings
 
 import pkg_resources
+from psycopg2.extensions import adapt
 
 from logtopg.version import __version__
 
@@ -106,13 +107,13 @@ class PGHandler(logging.Handler):
 
     def build_d(self, record_dict):
 
-        return {k:v for (k, v) in record_dict.items()
+        d = {k:v for (k, v) in record_dict.items()
             if k in set([
                 "created",
                 "name",
                 "levelno",
                 "levelname",
-                "msg",
+                # "msg",
                 "module",
                 "funcName",
                 "lineno",
@@ -121,6 +122,14 @@ class PGHandler(logging.Handler):
                 "thread",
                 "threadName",
                 ])}
+
+        try:
+            d["msg"] = adapt(record_dict["msg"])
+
+        except Exception as ex:
+            d["msg"] = str(record_dict["msg"])
+
+        return d
 
     def emit(self, record):
 
@@ -150,7 +159,32 @@ class PGHandler(logging.Handler):
             pgconn.commit()
 
         except Exception as ex:
+            pass
 
-            warnings.warn(
-                "Something couldn't be logged to the database!",
-                stacklevel=4)
+
+example_dict_config = dict({
+
+    'handlers': {
+        'pg': {
+            'class': 'logtopg.PGHandler',
+            'level': 'DEBUG',
+            'log_table_name': 'logtopg_tests',
+
+            'params': {
+                "database":"logtopg",
+                "host":"localhost",
+                "user":"logtopg",
+                "password":"l0gt0pg"},
+
+        }},
+
+    'root': {
+        'handlers': ['pg'],
+        'level': 'DEBUG'},
+
+    'version': 1,
+
+    # This is important!  Without it, any log instances created before
+    # you run logging.config.dictConfig(...) will be disabled.
+    'disable_existing_loggers': False,
+})

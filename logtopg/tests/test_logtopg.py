@@ -15,32 +15,24 @@ class Test1(unittest.TestCase):
     then drop it.
     """
 
-    db_credentials = {
-        "database":"logtopg",
-        "host":"localhost",
-        "user":"logtopg",
-        "password":"l0gt0pg"}
-
-    d = dict({
-
-        'handlers': {
-            'pg': {
-                'class': 'logtopg.PGHandler',
-                'level': 'DEBUG',
-                'log_table_name': 'logtopg_tests',
-
-                # These need to be correct, so you'll likely need to
-                # change them.
-                'params': db_credentials
-            }},
-
-        'root': {
-            'handlers': ['pg'],
-            'level': 'DEBUG'},
-
-        'version': 1})
-
+    d = logtopg.example_dict_config
     log_table_name = d["handlers"]["pg"]["log_table_name"]
+    db_credentials = d["handlers"]["pg"]["params"]
+
+
+    def setUp(self):
+
+        logging.config.dictConfig(self.d)
+
+        self.log = logging.getLogger("logtopg.tests")
+
+        self.ltpg = logtopg.PGHandler(
+            self.log_table_name,
+            self.db_credentials)
+
+        # Make a separate database connection to check results in
+        # database.
+        self.test_pgconn = psycopg2.connect(**self.db_credentials)
 
     def test_1(self):
 
@@ -48,21 +40,17 @@ class Test1(unittest.TestCase):
         Verify we only read sql files once each.
         """
 
-        ltpg = logtopg.PGHandler(
-            self.log_table_name,
-            self.db_credentials)
+        self.assertTrue(self.ltpg.create_table_sql is None)
 
-        self.assertTrue(ltpg.create_table_sql is None)
+        s1 = self.ltpg.get_create_table_sql()
 
-        s1 = ltpg.get_create_table_sql()
+        self.assertTrue(isinstance(self.ltpg.create_table_sql, basestring))
 
-        self.assertTrue(isinstance(ltpg.create_table_sql, basestring))
-
-        s2 = ltpg.get_create_table_sql()
+        s2 = self.ltpg.get_create_table_sql()
 
         self.assertTrue(s1 is s2)
 
-        ltpg.get_insert_row_sql()
+        self.ltpg.get_insert_row_sql()
 
 
     def test_2(self):
@@ -120,6 +108,7 @@ class Test1(unittest.TestCase):
 
         ltpg.pgconn.rollback()
 
+
     def test_4(self):
 
         """
@@ -127,6 +116,11 @@ class Test1(unittest.TestCase):
         """
 
         logging.config.dictConfig(self.d)
+
+        log1 = logging.getLogger("logtopg.tests")
+        log2 = logging.getLogger("logtopg.tests")
+        log3 = logging.getLogger("logtopg.tests")
+        log4 = logging.getLogger("logtopg.tests")
 
         log = logging.getLogger("logtopg.tests")
 
@@ -137,23 +131,26 @@ class Test1(unittest.TestCase):
         log.critical("critical!")
 
         # Now check that those logs are actually in the database.
-
-        # Grab the pgconn off the handler.
-        pgconn = log.root.handlers[0].pgconn
-
+        pgconn = log.root.handlers[0].get_pgconn()
         cursor = pgconn.cursor()
 
         cursor.execute(
             """
-            select *
+            select message
             from {}
             where process = %s
             """.format(self.log_table_name), [os.getpid()])
 
-        # There should be 5 logs in the database with this process's ID.
-        self.assertEqual(cursor.rowcount, 5)
+        for row in cursor:
+            print row[0]
+
+        counted_rows = cursor.rowcount
 
         pgconn.rollback()
+
+        # There should be 7 logs in the database with this process's ID.
+        # Those 7 are the five above and the two connection logs.
+        self.assertEqual(counted_rows, 7)
 
 
     def test_5(self):
@@ -208,6 +205,18 @@ class Test1(unittest.TestCase):
         log.debug("u is a {0}.".format(u))
         log.debug(u)
         log.debug(dict(u=u))
+
+    def tearDown(self):
+
+        self.test_pgconn.rollback()
+
+        cursor = self.test_pgconn.cursor()
+
+        cursor.execute(
+            "drop table if exists {0}".format(
+                Test1.log_table_name))
+
+        self.test_pgconn.commit()
 
 
 def tearDownModule():

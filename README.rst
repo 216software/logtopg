@@ -64,12 +64,6 @@ Hopefully it works!
 Stuff to do
 ===========
 
-*   Set up Circle CI to run unit tests as well as travis CI.  Maybe post
-     blog if one is vastly better than the other.
-
-*   Make it easy to discover the version number in an interactive
-    session.  Research a few ways to do this and then pick the best.
-
 *   Figure out how to discover when something can't be adapted, and then
     store a string version of it instead.
 
