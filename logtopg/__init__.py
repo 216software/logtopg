@@ -94,6 +94,11 @@ class PGHandler(logging.Handler):
 
     def get_insert_row_sql(self):
 
+        """
+        Cache the insert query (with placeholder parameters) in memory
+        so that every log.... call doesn't do file IO.
+        """
+
         if not self.insert_row_sql:
 
             self.insert_row_sql = \
@@ -103,7 +108,6 @@ class PGHandler(logging.Handler):
             .format(self.log_table_name)
 
         return self.insert_row_sql
-
 
     def build_d(self, record_dict):
 
@@ -123,6 +127,8 @@ class PGHandler(logging.Handler):
                 "threadName",
                 ])}
 
+        # Catch messages that can't be adapted as-is, and convert it to
+        # strings
         try:
             d["msg"] = adapt(record_dict["msg"])
 
