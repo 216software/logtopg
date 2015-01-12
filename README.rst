@@ -5,6 +5,7 @@ Log to PostgreSQL
 .. image:: https://travis-ci.org/216software/logtopg.svg?branch=master
     :target: https://travis-ci.org/216software/logtopg
 
+.. image:: https://circleci.com/gh/216software/logtopg.png?circle-token=389fee16249541b4b1df6e8a7f8edb1401be66de
 
 Install
 =======
@@ -83,7 +84,8 @@ Stuff to do
         *   inserted
         *   log level (DEBUG, INFO, WARN, ERROR, CRITICAL)
 
-*   Add a trigger to set the updated column if a row is ever updated.
+*   Somehow block updates to the table.  Maybe a trigger is the right
+    way.  Maybe there's a much simpler trick that I'm not aware of.
 
 *   Create a few views of typical queries.
 
@@ -110,5 +112,10 @@ Stuff to do
     *   discuss performance issues
 
 *   Set up a readthedocs page for logtopg for that documentation.
+
+*   Experiment with what happens when the emit(...) function call takes
+    a long time.  For example, say somebody is logging to a PG server
+    across the internet, will calls to log.debug(...) slow down  the
+    local app?  I imagine so.
 
 .. vim: set syntax=rst:
