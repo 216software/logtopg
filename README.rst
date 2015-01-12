@@ -65,29 +65,12 @@ Hopefully it works!
 Stuff to do
 ===========
 
-*   Figure out how to discover when something can't be adapted, and then
-    store a string version of it instead.
-
-*   Replace all the text columns with data types that better match the
-    underlying data.
-
 *   Fill out classifiers in setup.py.
-
-*   Look if there are any other columns we could store.  Can we look up
-    process names for a process ID and store the name?
-
-*   Add indexes on columns that are likely to be used in where-clauses,
-    such as:
-
-        *   log name (the ltree column)
-        *   process ID
-        *   inserted
-        *   log level (DEBUG, INFO, WARN, ERROR, CRITICAL)
 
 *   Somehow block updates to the table.  Maybe a trigger is the right
     way.  Maybe there's a much simpler trick that I'm not aware of.
 
-*   Create a few views of typical queries.
+*   Create a few views for typical queries.
 
 *   Test performance with many connected processes and tons of logging
     messages.  Make sure that logging doesn't compete with real
