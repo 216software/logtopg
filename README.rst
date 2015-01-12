@@ -6,6 +6,7 @@ Log to PostgreSQL
     :target: https://travis-ci.org/216software/logtopg
 
 .. image:: https://circleci.com/gh/216software/logtopg.png?circle-token=389fee16249541b4b1df6e8a7f8edb1401be66de
+   :target:https://circleci.com/gh/216software/logtopg
 
 Install
 =======
