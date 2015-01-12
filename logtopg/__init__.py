@@ -1,13 +1,15 @@
 # vim: set expandtab ts=4 sw=4 filetype=python fileencoding=utf8:
 
-import psycopg2
+
 import logging
+import os
+import subprocess
 import textwrap
 import traceback
-
 import warnings
 
 import pkg_resources
+import psycopg2
 from psycopg2.extensions import adapt
 
 from logtopg.version import __version__
@@ -52,11 +54,8 @@ class PGHandler(logging.Handler):
 
             create_table_sql = self.get_create_table_sql()
 
-            pgconn = self.get_pgconn()
-
-            pgconn.cursor().execute(create_table_sql)
-
-            pgconn.commit()
+            out = run_sql_commands(create_table_sql, self.user, self.password,
+                self.host, self.database)
 
             log.info("Created log table {0}.".format(self.log_table_name))
 
@@ -84,11 +83,13 @@ class PGHandler(logging.Handler):
 
         if not self.create_table_sql:
 
-            self.create_table_sql = \
+            s = \
             pkg_resources.resource_string(
                 "logtopg", "createtable.sql")\
             .decode("utf-8")\
             .format(self.log_table_name)
+
+            self.create_table_sql = s.encode("utf-8")
 
         return self.create_table_sql
 
@@ -111,21 +112,7 @@ class PGHandler(logging.Handler):
 
     def build_d(self, record_dict):
 
-        d = {k:v for (k, v) in record_dict.items()
-            if k in set([
-                "created",
-                "name",
-                "levelno",
-                "levelname",
-                # "msg",
-                "module",
-                "funcName",
-                "lineno",
-                "exc_text",
-                "process",
-                "thread",
-                "threadName",
-                ])}
+        d = record_dict
 
         # Catch messages that can't be adapted as-is, and convert it to
         # strings
@@ -156,14 +143,9 @@ class PGHandler(logging.Handler):
 
         cursor = pgconn.cursor()
 
-        try:
-
-            cursor.execute(
-                self.get_insert_row_sql(),
-                self.build_d(record.__dict__))
-
-        except Exception as ex:
-            pass
+        cursor.execute(
+            self.get_insert_row_sql(),
+            self.build_d(record.__dict__))
 
 
 example_dict_config = dict({
@@ -217,3 +199,37 @@ example_dict_config = dict({
     # won't do anything.
     'disable_existing_loggers': False,
 })
+
+def run_sql_commands(sql_text, user, password, host, database):
+
+    """
+    Run a whole bunch of SQL commands.  This is nice when you have a
+    script with more than one statement in it.
+
+    Don't pass me the path to a SQL script file!  Instead, give me the
+    sql text after you read it in from a file.
+    """
+
+    env = os.environ.copy()
+    env['PGPASSWORD'] = password
+
+    # Feed the sql_text to psql's stdin.
+    # http://stackoverflow.com/questions/163542/python-how-do-i-pass-a-string-into-subprocess-popen-using-the-stdin-argument
+    p = subprocess.Popen([
+        "psql",
+        "--quiet",
+        "--no-psqlrc",
+        "-U",
+        user,
+        "-h",
+        host,
+        "-d",
+        database,
+        "--single-transaction",
+        ],
+        stdin=subprocess.PIPE,
+        env=env)
+
+    out = p.communicate(input=sql_text)
+
+    return out

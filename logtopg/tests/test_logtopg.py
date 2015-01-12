@@ -95,7 +95,7 @@ class Test1(unittest.TestCase):
 
         s1 = self.ltpg.get_create_table_sql()
 
-        self.assertTrue(isinstance(self.ltpg.create_table_sql, basestring))
+        self.assertTrue(isinstance(self.ltpg.create_table_sql, bytes))
 
         s2 = self.ltpg.get_create_table_sql()
 
@@ -188,7 +188,7 @@ class Test1(unittest.TestCase):
             """
             select message
             from {}
-            where process = %s
+            where process_id = %s
             """.format(self.log_table_name), [os.getpid()])
 
         counted_rows = cursor.rowcount

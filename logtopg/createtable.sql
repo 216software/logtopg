@@ -16,14 +16,13 @@ create table if not exists {0} (
     line_number int,
 
     log_level text,
+    log_level_number int,
 
     message text,
 
-    log_level_number int,
-
     exc_info text,
-    thread_id integer,
-    threadname text,
+    thread_id bigint,
+    thread_name text,
     inserted timestamptz not null default now()
 );
 
