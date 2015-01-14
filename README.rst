@@ -102,4 +102,15 @@ Stuff to do
     across the internet, will calls to log.debug(...) slow down  the
     local app?  I imagine so.
 
+*   I just found out that the ltree column type (that I use for logger
+    names) can not handle logger names like "dazzle.insert-stuff".  That
+    dash in there is invalid syntax.
+
+    I hope there is a way to raise an exception as soon as somebody uses
+    an invalid logger name.
+
+    Or, maybe I need to convert the invalid name to a valid name, by
+    maybe substituting any of a set of characters with something else.
+
+
 .. vim: set syntax=rst:
