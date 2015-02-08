@@ -233,3 +233,6 @@ def run_sql_commands(sql_text, user, password, host, database):
     out = p.communicate(input=sql_text)
 
     return out
+
+def f():
+    print "testing out stuff"
