@@ -29,6 +29,7 @@ setup(
 
     # I think that as I add new test folders, I'll need to keep adding
     # them in here.
-    test_suite="logtopg.tests",
+    # test_suite="logtopg.tests",
+    test_suite="nose.collector",
     use_2to3=True,
 )
