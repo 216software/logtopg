@@ -112,5 +112,18 @@ Stuff to do
     Or, maybe I need to convert the invalid name to a valid name, by
     maybe substituting any of a set of characters with something else.
 
+*   Set up table partitioning so that when there are millions or logs,
+    they are dealt with sanely.
+
+    This is a query that shows logs by day and log level::
+
+        select to_char(date_trunc('day', inserted), 'YYYY-MM-DD'),
+        log_level, count(*)
+
+        from dazzlelogs
+
+        group by 1, 2
+
+        order by 1, 2;
 
 .. vim: set syntax=rst:
