@@ -18,7 +18,8 @@ log = logging.getLogger(__name__)
 
 class PGHandler(logging.Handler):
 
-    def __init__(self, log_table_name, user, password, host, database):
+    def __init__(self, log_table_name, user, password, host, database,
+        port=5432):
 
         logging.Handler.__init__(self)
 
@@ -28,6 +29,7 @@ class PGHandler(logging.Handler):
         self.host = host
         self.user = user
         self.password = password
+        self.port = port
 
         self.pgconn = None
         self.create_table_sql = None
@@ -70,9 +72,10 @@ class PGHandler(logging.Handler):
 
         self.pgconn = psycopg2.connect(
             database=self.database,
-            host = self.host,
-            user = self.user,
-            password = self.password)
+            host=self.host,
+            user=self.user,
+            password=self.password,
+            port=self.port)
 
         self.pgconn.autocommit = True
 
