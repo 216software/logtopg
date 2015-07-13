@@ -22,4 +22,4 @@ addons:
 before_script:
   - psql -c "create user logtopg with password 'l0gt0pg';" -U postgres
   - psql -c "create database logtopg_tests with owner logtopg;" -U postgres
-  - psql -d logtopg -c "create extension ltree;" -U postgres
+  - psql -d logtopg_tests -c "create extension ltree;" -U postgres
