@@ -22,11 +22,7 @@ testing_dict_config = dict({
             'class': 'logtopg.PGHandler',
             'level': 'DEBUG',
             'log_table_name': 'logtopg_tests',
-
-            "database":"logtopg",
-            "host":"localhost",
-            "user":"logtopg",
-            "password":"l0gt0pg",
+            "database":"logtopg_tests",
         },
 
         "console": {
@@ -57,9 +53,9 @@ class Test1(unittest.TestCase):
     d = testing_dict_config
     log_table_name = d["handlers"]["pg"]["log_table_name"]
     database = d["handlers"]["pg"]["database"]
-    user = d["handlers"]["pg"]["user"]
-    password = d["handlers"]["pg"]["password"]
-    host = d["handlers"]["pg"]["host"]
+    user = d["handlers"]["pg"].get("user")
+    password = d["handlers"]["pg"].get("password")
+    host = d["handlers"]["pg"].get("host")
 
     db_credentials = dict(
         user=user,

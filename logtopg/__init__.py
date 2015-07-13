@@ -18,7 +18,11 @@ log = logging.getLogger(__name__)
 
 class PGHandler(logging.Handler):
 
-    def __init__(self, log_table_name, user, password, host, database,
+    def __init__(self, log_table_name,
+        database,
+        user=None,
+        password=None,
+        host=None,
         port=5432):
 
         logging.Handler.__init__(self)
@@ -57,7 +61,7 @@ class PGHandler(logging.Handler):
             create_table_sql = self.get_create_table_sql()
 
             out = run_sql_commands(create_table_sql, self.user, self.password,
-                self.host, self.database)
+                self.host, self.port, self.database)
 
             log.info("Created log table {0}.".format(self.log_table_name))
 
@@ -203,7 +207,7 @@ example_dict_config = dict({
     'disable_existing_loggers': False,
 })
 
-def run_sql_commands(sql_text, user, password, host, database):
+def run_sql_commands(sql_text, user, password, host, port, database):
 
     """
     Run a whole bunch of SQL commands.  This is nice when you have a
@@ -214,28 +218,39 @@ def run_sql_commands(sql_text, user, password, host, database):
     """
 
     env = os.environ.copy()
-    env['PGPASSWORD'] = password
+
+    if password:
+        env['PGPASSWORD'] = password
 
     # Feed the sql_text to psql's stdin.
     # http://stackoverflow.com/questions/163542/python-how-do-i-pass-a-string-into-subprocess-popen-using-the-stdin-argument
-    p = subprocess.Popen([
+
+    stuff = [
         "psql",
         "--quiet",
         "--no-psqlrc",
-        "-U",
-        user,
-        "-h",
-        host,
         "-d",
         database,
         "--single-transaction",
-        ],
+    ]
+
+    if user:
+        stuff.append("-U")
+        stuff.append(user)
+
+    if host:
+        stuff.append("-h")
+        stuff.append(host)
+
+    if port:
+        stuff.append("-p")
+        stuff.append(str(port))
+
+    p = subprocess.Popen(
+        stuff,
         stdin=subprocess.PIPE,
         env=env)
 
     out = p.communicate(input=sql_text)
 
     return out
-
-def f():
-    print "testing out stuff"
