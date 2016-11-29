@@ -41,18 +41,22 @@ class PGHandler(logging.Handler):
 
     def check_if_log_table_exists(self):
 
-        pgconn = self.get_pgconn()
+        while (True):
+            pgconn = self.get_pgconn()
 
-        cursor = pgconn.cursor()
+            cursor = pgconn.cursor()
 
-        cursor.execute("""
-            select exists(
-                select *
-                from information_schema.tables
-                where table_name = %s)
-            """, [self.log_table_name])
+            try:
+                cursor.execute("""
+                SELECT %s::regclass;
+                """, [self.log_table_name])
+            except psycopg2.ProgrammingError as e:
+                return False
+            except InterfaceError as ie:
+                self.pgconn = None
+                continue
 
-        return cursor.fetchone()[0]
+            return True
 
     def maybe_create_table(self):
 
