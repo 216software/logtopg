@@ -58,10 +58,9 @@ class PGHandler(logging.Handler):
 
         if not self.check_if_log_table_exists():
 
-            create_table_sql = self.get_create_table_sql()
+            create_table_sql = self.get_create_table_sql().decode("utf-8")
 
-            out = run_sql_commands(create_table_sql, self.user, self.password,
-                self.host, self.port, self.database)
+            out = self.run_sql_commands(create_table_sql)
 
             log.info("Created log table {0}.".format(self.log_table_name))
 
@@ -154,6 +153,25 @@ class PGHandler(logging.Handler):
             self.get_insert_row_sql(),
             self.build_d(record.__dict__))
 
+    def run_sql_commands(self, sql_text):
+        """
+        Run a whole bunch of SQL commands.  This is nice when you have a
+        script with more than one statement in it.
+
+        Don't pass me the path to a SQL script file!  Instead, give me the
+        sql text after you read it in from a file.
+
+        WARNING: requires all individual statements in a script to be
+        separated by semicolon!
+        """
+        pgconn = self.get_pgconn()
+        cursor = pgconn.cursor()
+        for stmt in sql_text.split(';'):
+            stmt = stmt.strip()
+            if stmt:
+                # log.debug("EXECUTE '%s'", stmt)
+                cursor.execute(stmt)
+
 
 example_dict_config = dict({
 
@@ -206,51 +224,3 @@ example_dict_config = dict({
     # won't do anything.
     'disable_existing_loggers': False,
 })
-
-def run_sql_commands(sql_text, user, password, host, port, database):
-
-    """
-    Run a whole bunch of SQL commands.  This is nice when you have a
-    script with more than one statement in it.
-
-    Don't pass me the path to a SQL script file!  Instead, give me the
-    sql text after you read it in from a file.
-    """
-
-    env = os.environ.copy()
-
-    if password:
-        env['PGPASSWORD'] = password
-
-    # Feed the sql_text to psql's stdin.
-    # http://stackoverflow.com/questions/163542/python-how-do-i-pass-a-string-into-subprocess-popen-using-the-stdin-argument
-
-    stuff = [
-        "psql",
-        "--quiet",
-        "--no-psqlrc",
-        "-d",
-        database,
-        "--single-transaction",
-    ]
-
-    if user:
-        stuff.append("-U")
-        stuff.append(user)
-
-    if host:
-        stuff.append("-h")
-        stuff.append(host)
-
-    if port:
-        stuff.append("-p")
-        stuff.append(str(port))
-
-    p = subprocess.Popen(
-        stuff,
-        stdin=subprocess.PIPE,
-        env=env)
-
-    out = p.communicate(input=sql_text)
-
-    return out
