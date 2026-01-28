@@ -12,7 +12,8 @@ with open("logtopg/version.py") as f:
 from setuptools import find_packages, setup
 
 setup(
-    name="LogToPG",
+    # name="LogToPG",
+    name="logtopg",
     version=__version__,
     description="Python logging handler that stores logs in postgresql",
     url="https://github.com/216software/logtopg/",
@@ -27,6 +28,7 @@ setup(
         'psycopg2',
     ],
 
-    test_suite="nose.collector",
-    use_2to3=True,
+    # Are these not allowed any more?
+    # test_suite="nose.collector",
+    # use_2to3=True,
 )
