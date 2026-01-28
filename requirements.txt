@@ -1,2 +1,3 @@
 psycopg2==2.5.4
+psutil
 nose>=1.3.4

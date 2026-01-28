@@ -12,6 +12,7 @@ insert into {0} (
     log_level_number,
     message,
     exc_info,
+    cmd_line,
     thread_id,
     thread_name
 ) values (
@@ -28,6 +29,7 @@ insert into {0} (
     %(levelno)s,
     %(message)s,
     %(exc_text)s,
+    %(cmd_line)s,
     %(thread)s,
     %(threadName)s
 );

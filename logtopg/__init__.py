@@ -8,6 +8,8 @@ import textwrap
 import traceback
 import warnings
 
+import psutil
+
 import pkg_resources
 import psycopg2
 from psycopg2.extensions import adapt
@@ -124,6 +126,9 @@ class PGHandler(logging.Handler):
     def build_d(self, record_dict):
 
         d = record_dict
+
+        # Insert process info
+        d['cmd_line'] = " ".join(psutil.Process(os.getpid()).cmdline())
 
         # Catch messages that can't be adapted as-is, and convert it to
         # strings

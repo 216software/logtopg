@@ -1,5 +1,8 @@
 create table if not exists {0} (
 
+    log_id int generated
+    by default as identity primary key,
+
     created timestamptz,
 
     process_id int,
@@ -18,6 +21,8 @@ create table if not exists {0} (
     log_level text,
     log_level_number int,
 
+    cmd_line text,
+
     message text,
 
     exc_info text,
@@ -30,3 +35,6 @@ create index on {0} (created);
 create index on {0} (inserted);
 create index on {0} (logger_name);
 create index on {0} (process_id);
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX idx_logs_cmdline ON {0} USING GIN (cmd_line gin_trgm_ops);
