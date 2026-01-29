@@ -37,4 +37,4 @@ create index on {0} (logger_name);
 create index on {0} (process_id);
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
-CREATE INDEX idx_logs_cmdline ON {0} USING GIN (cmd_line gin_trgm_ops);
+CREATE INDEX idx_{0}_cmdline ON {0} USING GIN (cmd_line gin_trgm_ops);
