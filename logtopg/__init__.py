@@ -11,8 +11,7 @@ import warnings
 import psutil
 
 import pkg_resources
-import psycopg2
-from psycopg2.extensions import adapt
+import psycopg
 
 from logtopg.version import __version__
 
@@ -25,7 +24,8 @@ class PGHandler(logging.Handler):
         user=None,
         password=None,
         host=None,
-        port=5432):
+        port=5432,
+        autocommit=True):
 
         logging.Handler.__init__(self)
 
@@ -37,7 +37,10 @@ class PGHandler(logging.Handler):
         self.password = password
         self.port = port
 
+        self.autocommit = autocommit
+
         self.pgconn = None
+        self.log_table_exists = False
         self.create_table_sql = None
         self.insert_row_sql = None
 
@@ -52,15 +55,20 @@ class PGHandler(logging.Handler):
                 cursor.execute("""
                 SELECT %s::regclass;
                 """, [self.log_table_name])
-            except psycopg2.ProgrammingError as e:
+            except psycopg.ProgrammingError as e:
+                if not self.autocommit:
+                    pgconn.rollback()
                 return False
-            except InterfaceError as ie:
+            except psycopg.InterfaceError as ie:
                 self.pgconn = None
                 continue
 
             return True
 
     def maybe_create_table(self):
+
+        if self.log_table_exists:
+            return
 
         if not self.check_if_log_table_exists():
 
@@ -71,6 +79,8 @@ class PGHandler(logging.Handler):
 
             log.info("Created log table {0}.".format(self.log_table_name))
 
+        self.log_table_exists = True
+
     def get_pgconn(self):
 
         if not self.pgconn:
@@ -80,17 +90,16 @@ class PGHandler(logging.Handler):
 
     def make_pgconn(self):
 
-        self.pgconn = psycopg2.connect(
-            database=self.database,
+        self.pgconn = psycopg.connect(
+            dbname=self.database,
             host=self.host,
             user=self.user,
             password=self.password,
-            port=self.port)
+            port=self.port,
+            autocommit=self.autocommit)
 
-        self.pgconn.autocommit = True
-
-        log.info("Just made an autocommitting database connection: {0}.".format(
-            self.pgconn))
+        log.info("Just made a database connection (autocommit={1}): {0}.".format(
+            self.pgconn, self.autocommit))
 
     def get_create_table_sql(self):
 
@@ -130,13 +139,9 @@ class PGHandler(logging.Handler):
         # Insert process info
         d['cmd_line'] = " ".join(psutil.Process(os.getpid()).cmdline())
 
-        # Catch messages that can't be adapted as-is, and convert it to
-        # strings
-        try:
-            d["msg"] = adapt(record_dict["msg"])
-
-        except Exception as ex:
-            d["msg"] = str(record_dict["msg"])
+        # Catch messages that can't be adapted as-is, and convert to strings
+        if not isinstance(d["msg"], (str, int, float, bool, bytes, type(None))):
+            d["msg"] = str(d["msg"])
 
         return d
 

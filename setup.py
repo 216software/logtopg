@@ -25,7 +25,7 @@ setup(
     include_package_data=True,
 
     install_requires=[
-        'psycopg2',
+        'psycopg>=3.0',
     ],
 
     # Are these not allowed any more?

@@ -63,8 +63,8 @@ Then run the tests like this::
 Hopefully it works!
 
 
-Stuff to do
-===========
+Stuff to do / Next Steps / Requests for help
+============================================
 
 *   Fill out classifiers in setup.py.
 
@@ -125,5 +125,23 @@ Stuff to do
         group by 1, 2
 
         order by 1, 2;
+
+----
+
+Update to the most recent version of psycopg (psycopg 3.3.4 right now).
+
+----
+
+Explore PROs and CONs of using an autocommitting connection, given we
+are talking about logs.
+
+----
+
+Turn up postgresql-side query logging and see if I'm doing anything
+silly, like checking stuff every single time that I could do once, when
+making a connection, or something like that.
+
+
+
 
 .. vim: set syntax=rst:

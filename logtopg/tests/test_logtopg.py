@@ -6,7 +6,7 @@ import os
 import unittest
 
 import logtopg
-import psycopg2
+import psycopg
 
 testing_dict_config = dict({
 
@@ -79,7 +79,7 @@ class Test1(unittest.TestCase):
 
         # Make a separate database connection to check results in
         # database.
-        self.test_pgconn = psycopg2.connect(**self.db_credentials)
+        self.test_pgconn = psycopg.connect(**self.db_credentials)
 
     def test_1(self):
 
@@ -152,8 +152,6 @@ class Test1(unittest.TestCase):
         ltpg.maybe_create_table()
         ltpg.maybe_create_table()
         ltpg.maybe_create_table()
-
-        ltpg.pgconn.rollback()
 
 
     def test_4(self):
@@ -263,7 +261,7 @@ class Test1(unittest.TestCase):
 
 def tearDownModule():
 
-    pgconn = psycopg2.connect(**Test1.db_credentials)
+    pgconn = psycopg.connect(**Test1.db_credentials)
 
     cursor = pgconn.cursor()
 
