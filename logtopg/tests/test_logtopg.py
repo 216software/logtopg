@@ -61,7 +61,7 @@ class Test1(unittest.TestCase):
         user=user,
         password=password,
         host=host,
-        database=database,
+        dbname=database,
     )
 
     def setUp(self):

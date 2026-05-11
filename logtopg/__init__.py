@@ -10,7 +10,7 @@ import warnings
 
 import psutil
 
-import pkg_resources
+import importlib.resources
 import psycopg
 
 from logtopg.version import __version__
@@ -106,9 +106,9 @@ class PGHandler(logging.Handler):
         if not self.create_table_sql:
 
             s = \
-            pkg_resources.resource_string(
-                "logtopg", "createtable.sql")\
-            .decode("utf-8")\
+            importlib.resources.files("logtopg")\
+            .joinpath("createtable.sql")\
+            .read_text(encoding="utf-8")\
             .format(self.log_table_name)
 
             self.create_table_sql = s.encode("utf-8")
@@ -125,9 +125,9 @@ class PGHandler(logging.Handler):
         if not self.insert_row_sql:
 
             self.insert_row_sql = \
-            pkg_resources.resource_string(
-                "logtopg", "insertrow.sql")\
-            .decode("utf-8")\
+            importlib.resources.files("logtopg")\
+            .joinpath("insertrow.sql")\
+            .read_text(encoding="utf-8")\
             .format(self.log_table_name)
 
         return self.insert_row_sql
