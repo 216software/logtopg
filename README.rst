@@ -142,6 +142,20 @@ silly, like checking stuff every single time that I could do once, when
 making a connection, or something like that.
 
 
+Deploying new versions
+======================
+
+You need a $HOME/.pypirc file that has a token in it.  To get that, go
+to here, log in, and make one::
+
+  https://pypi.org/manage/account/token/
+
+After that, this is how it is supposed to work::
+
+  $ python setup.py sdist
+  $ twine upload --repository logtopg dist/logtopg-1.0.3.tar.gz
+
+
 
 
 .. vim: set syntax=rst:
