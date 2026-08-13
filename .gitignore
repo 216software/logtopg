@@ -66,3 +66,6 @@ static/img/4hourchart.png
 static/img/8hourchart.png
 
 .noseids
+
+# Don't track the venv
+venv-logtoppg
