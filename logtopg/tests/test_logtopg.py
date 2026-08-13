@@ -6,7 +6,7 @@ import os
 import unittest
 
 import logtopg
-import psycopg2
+import psycopg
 
 testing_dict_config = dict({
 
@@ -70,6 +70,14 @@ class Test1(unittest.TestCase):
         database=database,
     )
 
+    db_connection_args = dict(
+        user=user,
+        password=password,
+        host=host,
+        port=port,
+        dbname=database,
+    )
+
     def setUp(self):
 
         logging.config.dictConfig(self.d)
@@ -86,7 +94,7 @@ class Test1(unittest.TestCase):
 
         # Make a separate database connection to check results in
         # database.
-        self.test_pgconn = psycopg2.connect(**self.db_credentials)
+        self.test_pgconn = psycopg.connect(**self.db_connection_args)
 
     def test_1(self):
 
@@ -127,6 +135,8 @@ class Test1(unittest.TestCase):
 
         self.assertTrue(conn1 is conn2)
 
+        ltpg.pgconn.close()
+
 
     def test_3(self):
 
@@ -160,7 +170,7 @@ class Test1(unittest.TestCase):
         ltpg.maybe_create_table()
         ltpg.maybe_create_table()
 
-        ltpg.pgconn.rollback()
+        ltpg.pgconn.close()
 
 
     def test_4(self):
@@ -267,10 +277,15 @@ class Test1(unittest.TestCase):
 
         self.test_pgconn.commit()
 
+        if self.ltpg.pgconn:
+            self.ltpg.pgconn.close()
+
+        self.test_pgconn.close()
+
 
 def tearDownModule():
 
-    pgconn = psycopg2.connect(**Test1.db_credentials)
+    pgconn = psycopg.connect(**Test1.db_connection_args)
 
     cursor = pgconn.cursor()
 
@@ -279,6 +294,8 @@ def tearDownModule():
             Test1.log_table_name))
 
     pgconn.commit()
+
+    pgconn.close()
 
 
 if __name__ == "__main__":

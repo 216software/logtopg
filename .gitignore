@@ -57,6 +57,7 @@ docs/_build/
 static/bower_components
 static/node_modules
 dazzle/webapp/static/img
+.swp
 .*.swp
 dev.yaml
 
@@ -67,5 +68,5 @@ static/img/8hourchart.png
 
 .noseids
 
-# Don't track the venv
-venv-logtoppg
+# Ignore my venv for working on this
+/venv-logtopg
