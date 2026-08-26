@@ -7,6 +7,7 @@ import subprocess
 import textwrap
 import traceback
 import warnings
+import weakref
 
 import psutil
 
@@ -43,6 +44,7 @@ class PGHandler(logging.Handler):
         self.log_table_exists = False
         self.create_table_sql = None
         self.insert_row_sql = None
+        self._finalizer = None
 
     def check_if_log_table_exists(self):
 
@@ -100,6 +102,14 @@ class PGHandler(logging.Handler):
 
         log.info("Just made a database connection (autocommit={1}): {0}.".format(
             self.pgconn, self.autocommit))
+
+        if self._finalizer is None:
+            self._finalizer = weakref.finalize(self, self.close_pgconn)
+
+    def close_pgconn(self):
+
+        if self.pgconn and not self.pgconn.closed:
+            self.pgconn.close()
 
     def get_create_table_sql(self):
 
@@ -235,6 +245,13 @@ def run_sql_commands(sql_text, user, password, host, port, database):
 
     if password:
         env['PGPASSWORD'] = password
+
+    # Silence informational server messages (like "extension already
+    # exists") while keeping warnings and errors visible.
+    if isinstance(sql_text, str):
+        sql_text = "SET client_min_messages = WARNING;\n" + sql_text
+    else:
+        sql_text = b"SET client_min_messages = WARNING;\n" + sql_text
 
     # Feed the sql_text to psql's stdin.
     # http://stackoverflow.com/questions/163542/python-how-do-i-pass-a-string-into-subprocess-popen-using-the-stdin-argument

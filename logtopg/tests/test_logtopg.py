@@ -22,7 +22,11 @@ testing_dict_config = dict({
             'class': 'logtopg.PGHandler',
             'level': 'DEBUG',
             'log_table_name': 'logtopg_tests',
-            "database":"logtopg_tests",
+            'database': os.environ.get('LOGTOPG_TEST_DATABASE', 'logtopg_tests'),
+            'user': os.environ.get('LOGTOPG_TEST_USER'),
+            'password': os.environ.get('LOGTOPG_TEST_PASSWORD'),
+            'host': os.environ.get('LOGTOPG_TEST_HOST'),
+            'port': int(os.environ.get('LOGTOPG_TEST_PORT', '5432')),
         },
 
         "console": {
@@ -56,11 +60,21 @@ class Test1(unittest.TestCase):
     user = d["handlers"]["pg"].get("user")
     password = d["handlers"]["pg"].get("password")
     host = d["handlers"]["pg"].get("host")
+    port = d["handlers"]["pg"].get("port")
 
     db_credentials = dict(
         user=user,
         password=password,
         host=host,
+        port=port,
+        database=database,
+    )
+
+    db_connection_args = dict(
+        user=user,
+        password=password,
+        host=host,
+        port=port,
         dbname=database,
     )
 
@@ -72,14 +86,15 @@ class Test1(unittest.TestCase):
 
         self.ltpg = logtopg.PGHandler(
             self.log_table_name,
-            self.user,
-            self.password,
-            self.host,
-            self.database)
+            self.database,
+            user=self.user,
+            password=self.password,
+            host=self.host,
+            port=self.port)
 
         # Make a separate database connection to check results in
         # database.
-        self.test_pgconn = psycopg.connect(**self.db_credentials)
+        self.test_pgconn = psycopg.connect(**self.db_connection_args)
 
     def test_1(self):
 
@@ -120,6 +135,8 @@ class Test1(unittest.TestCase):
 
         self.assertTrue(conn1 is conn2)
 
+        ltpg.pgconn.close()
+
 
     def test_3(self):
 
@@ -152,6 +169,8 @@ class Test1(unittest.TestCase):
         ltpg.maybe_create_table()
         ltpg.maybe_create_table()
         ltpg.maybe_create_table()
+
+        ltpg.pgconn.close()
 
 
     def test_4(self):
@@ -258,10 +277,15 @@ class Test1(unittest.TestCase):
 
         self.test_pgconn.commit()
 
+        if self.ltpg.pgconn:
+            self.ltpg.pgconn.close()
+
+        self.test_pgconn.close()
+
 
 def tearDownModule():
 
-    pgconn = psycopg.connect(**Test1.db_credentials)
+    pgconn = psycopg.connect(**Test1.db_connection_args)
 
     cursor = pgconn.cursor()
 
@@ -270,6 +294,8 @@ def tearDownModule():
             Test1.log_table_name))
 
     pgconn.commit()
+
+    pgconn.close()
 
 
 if __name__ == "__main__":

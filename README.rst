@@ -53,12 +53,40 @@ Create test user and test database::
 
 Then run the tests like this::
 
-    $ python setup.py --quiet test
-    .....
+    $ LOGTOPG_TEST_HOST=localhost \
+    $ LOGTOPG_TEST_PORT=5432 \
+    $ LOGTOPG_TEST_USER=logtopg \
+    $ LOGTOPG_TEST_PASSWORD=l0gt0pg \
+    $ LOGTOPG_TEST_DATABASE=logtopg_tests \
+    $ python -m unittest discover -s logtopg/tests -v
+    test_1 (test_logtopg.Test1.test_1)
+    Verify we only read sql files once each. ... ok
+    ...
     ----------------------------------------------------------------------
-    Ran 5 tests in 0.379s
+    Ran 7 tests in 0.735s
 
     OK
+
+The tests connect to a real postgresql database.  Each test logs into
+the database specified by the ``LOGTOPG_TEST_*`` environment variables
+above.  The database needs to have the ``ltree`` extension installed,
+and the host needs the ``psql`` command line client, because logtopg
+uses ``psql`` to run its multi-statement SQL scripts.
+
+A convenient way to get a test database is with the provided
+``Dockerfile``::
+
+    $ docker build -t logtopg-postgres .
+    $ docker run --name logtopg-postgres -p 5433:5432 -d logtopg-postgres
+
+Then point the tests at it::
+
+    $ LOGTOPG_TEST_HOST=localhost \
+    $ LOGTOPG_TEST_PORT=5433 \
+    $ LOGTOPG_TEST_USER=logtopg \
+    $ LOGTOPG_TEST_PASSWORD=l0gt0pg \
+    $ LOGTOPG_TEST_DATABASE=logtopg_tests \
+    $ python -m unittest discover -s logtopg/tests -v
 
 Hopefully it works!
 
@@ -152,8 +180,12 @@ to here, log in, and make one::
 
 After that, this is how it is supposed to work::
 
+  $ vim setup.py # set a new version.
   $ python setup.py sdist
   $ twine upload --repository logtopg dist/logtopg-1.0.3.tar.gz
+
+Change the last line to whatever the new version is.
+
 
 
 
