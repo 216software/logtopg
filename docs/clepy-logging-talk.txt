@@ -1,0 +1,155 @@
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+How to use logging in general and how to store logs in a postgresql database
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+How to use logging
+==================
+
+First do this::
+
+  import logging
+
+And either this (most of the time):
+
+  log = logging.getLogger(__name__)
+
+Or this instead::
+
+  log = logging.getLogger("bogusproject.cronjobs.do_daily_chores")
+
+Use the string rather than __name__ when __name__ will evaluate to
+"__main__" (like when you run a script).
+
+And then after setting up that module-level variable, you just do this::
+
+  log.debug(f"Got {len(chores)} chores to do today")
+
+Or maybe::
+
+  try:
+    do_something_risky()
+  except Exception as ex:
+    log.error("It didn't work!", exc_info=True)
+
+f-strings always get evaluated
+==============================
+
+If performance really, really matters, be aware that logs are adding
+time to your stack!
+
+All those::
+
+  log.debug(...)
+
+calls can be replaced with something like::
+
+   def do_nothing(*args, **kwargs):
+      pass
+
+  log.debug = do_nothing
+
+so that you're not running through the logging handlers system when you
+turned off debugs.
+
+However, it gets more complex::
+
+If len(chores) is why your code is slow, then both of these are still
+gonna be slow:
+
+  log.debug(f"I found {len(chores)} chores to do today")
+
+And::
+
+  log.debug("I found %s chores to do today", len(chores))
+
+However, be aware that the len(chores) part is still being evaluated!
+
+Why would len(chores) be slow?  Maybe chores is some ORM thingy that
+defined its __len__ method to do something like::
+
+  SELECT COUNT(*)
+  FROM CHORES
+  WHERE ...
+
+If python were as cool as (and as confusing as) common lisp, then there
+would be a way to say for this line::
+
+  log.debug("Got %s chores to do today", len(chores))
+
+"Don't even evaluate the stuff inside debug(...) unless I tell you!"
+
+But we don't have that kind of power in python (and for good reason --
+common lisp drives you mad).
+
+Three ways to setup your logging system
+=======================================
+
+It needs to be this way!
+
+1.  do lots of method calls
+
+2.  load in a cfg file
+
+3.  load in a dictionary
+
+My fave: use a yaml file (not a cfg file), convert it to a dictionary,
+then load in the dictionary as logging config.
+
+
+How to configure logging like how I like
+========================================
+
+Stream handler to stderr with special colorfmt formatter (DEBUG and up)
+
+Rotating log file in /tmp (DEBUG and up)
+
+database logs (INFO and up)
+
+emails (CRITICAL)
+
+Configure the app to log DEBUG and up, root to handle WARNING and up.
+
+Logs are so important to me that I like having several copies going.
+
+How to log exceptions
+=====================
+
+App logs logs vs library logs
+=============================
+
+Put the root logger at one level (I usually use INFO) and put your own
+app at DEBUG so that you can log your own app stuff differently than
+anything else.
+
+
+Now, how to use logtopg
+=======================
+
+Install it
+
+Add it to your config somehow
+
+Also, set up a cron job to delete old logs, like:
+
+  psql -c "delete from logs where inserted < current_timestamp - interval '7 days';"
+
+That will delete anything older than 7 days.  Rewrite it for whatever
+you want.
+
+Maybe you want to use autocommit on logs.  Maybe you want a separate
+database connection too, so that an app crash that triggers a rollback
+doesn't roll back the logs.
+
+
+
+
+Old stuff I've done about logging
+=================================
+
+* https://blog.tplus1.com/blog/2007/09/28/the-python-logging-module-is-much-better-than-print-statements/
+
+* https://github.com/mw44118/really-good-logging/blob/master/finished-stuff.txt
+
+* https://www.youtube.com/watch?v=tJqA6FgqJXs&t=261s
+
+.. vim: set syntax=rst:
