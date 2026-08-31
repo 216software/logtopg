@@ -140,6 +140,35 @@ Maybe you want to use autocommit on logs.  Maybe you want a separate
 database connection too, so that an app crash that triggers a rollback
 doesn't roll back the logs.
 
+Maybe you don't want to send DEBUG logs into your database, so that you
+don't fill it up.
+
+
+History / Why / Inspiration
+===========================
+
+One company I worked at had a customer web application stack that would
+catch any uncaught exception, convert it to a string, and then store
+that string (and some of the details about the environment) into a
+database table.  A custom web app polled the database and displayed
+tables and charts of errors.
+
+This was sort of like a proto-sentry.  It worked great.
+
+----
+
+Later we worked on a different project where a linux box in a machine
+shop read data from dozens of sensors and recorded data every second at
+least.
+
+We added a screen to the webapp that did something like this:
+
+  $ tail -f app_log.txt | grep SENSOR | grep INFO
+
+And clients LOVED seeing the near-real-time logging data.  They trusted
+the system way more when they could watch the sensor data flow by.
+
+
 
 
 
@@ -151,5 +180,7 @@ Old stuff I've done about logging
 * https://github.com/mw44118/really-good-logging/blob/master/finished-stuff.txt
 
 * https://www.youtube.com/watch?v=tJqA6FgqJXs&t=261s
+
+* https://www.reddit.com/r/Python/comments/2vb3yg/logging_handler_to_store_logs_in_postgresql/
 
 .. vim: set syntax=rst:

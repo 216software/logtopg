@@ -1,5 +1,14 @@
 create table if not exists {0} (
 
+    -- TODO: maybe replace the log_id primary key with a primary key
+    -- like (box_name, log_id)
+    --
+    -- The point is so that it is easy to load in
+    -- data from multiple boxes into one aggregate without worrying
+    -- about primary key collisions.
+    --
+    -- Or, use a UUID for log_id?  Those are so annoying to type!
+
     log_id int generated
     by default as identity primary key,
 
