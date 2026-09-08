@@ -255,6 +255,7 @@ Create a postgresql database and user for your logs:
 
 .. code:: bash
 
+    $ sudo -u postgres creatuser matt
     $ sudo -u postgres createdb --owner matt clepy_logtopg_demo
 
 Add the "ltree" extension (it's built-in, but not enabled):
@@ -314,5 +315,17 @@ Old stuff I've written about logging
 * https://www.youtube.com/watch?v=tJqA6FgqJXs&t=261s
 
 * https://www.reddit.com/r/Python/comments/2vb3yg/logging_handler_to_store_logs_in_postgresql/
+
+Next Steps / Requests for help
+==============================
+
+1.  Try it out!  I know this works for me and for a few other people,
+    but I don't know how smooth the install process is.  Bug reports are
+    welcome.
+
+2.  Write better docs showing how to use logtopg!
+
+3.  Do some load testing / performance testing for really high-volume
+    scenarios.
 
 .. vim: set syntax=rst:
