@@ -6,11 +6,11 @@ How to use logging
 ==================
 
 Assuming you have logging configured somewhere else, this is all you
-gotta do.  .. code:: python
+gotta do.  ..code:: python
 
     import logging
 
-And then either this (most of the time).  .. code:: python
+And then either this (most of the time).  ..code:: python
 
    log = logging.getLogger(__name__)
 
