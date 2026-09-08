@@ -232,7 +232,8 @@ need to update one place!
 My logging config
 =================
 
-This is the way I set up my logging system:
+This is the way I set up my logging system (see yaml_example.py for
+example):
 
 * Stream handler to stderr with special colorfmt formatter (DEBUG and up)
 * Rotating text file in /tmp (DEBUG and up)
@@ -241,6 +242,40 @@ This is the way I set up my logging system:
 
 .. image:: yaml_example_stderr.png
 .. image:: logtopg_example.png
+
+Set different log levels for your project vs other packages
+===========================================================
+
+You probably don't want DEBUG-level logs from a library like boto3,
+because there's a lot of them!
+
+.. image:: boto_debug.png
+
+The boto_logging_info.py file shows how to set up logging so you get
+DEBUG-level logs of your own, but only INFO (and up) from boto.  The
+relevant YAML looks like this (see boto_logging_info.py):
+
+.. code:: yaml
+
+    root:
+        level: WARNING
+        handlers: [console]
+
+    loggers:
+
+        mycode: &mycodelogging
+            propagate: False
+            level: DEBUG
+            handlers: [console]
+
+        botocore:
+            propagate: False
+            level: INFO
+            handlers: [console]
+
+See that INFO in the botocore section?  That's what it takes!
+
+.. image:: boto_info.png
 
 Now, how to use logtopg
 =======================
