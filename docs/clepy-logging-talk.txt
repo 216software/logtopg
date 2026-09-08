@@ -60,7 +60,7 @@ By the way, log.exception is the same as doing:
 
 I have *opinions* about how and when to use the different levels:
 
-* debug is for... debugging. don't spam your logs!
+* debug is for... debugging.
 
 * info tracks state-changing operations, like login, logout, charge a
   credit card, etc.
@@ -246,16 +246,21 @@ example):
 Set different log levels for your project vs other packages
 ===========================================================
 
+You can configure each logger separately.
+
 You probably don't want DEBUG-level logs from a library like boto3,
 because there's a lot of them!
 
 .. image:: boto_debug.png
+
+Too much!
 
 The boto_logging_info.py file shows how to set up logging so you get
 DEBUG-level logs of your own, but only INFO (and up) from boto.  The
 relevant YAML looks like this (see boto_logging_info.py):
 
 .. code:: yaml
+    disable_existing_loggers: False
 
     root:
         level: WARNING
@@ -276,6 +281,27 @@ relevant YAML looks like this (see boto_logging_info.py):
 See that INFO in the botocore section?  That's what it takes!
 
 .. image:: boto_info.png
+
+Use ltree to search logs
+========================
+
+Notice that in the screenshot, there's an INFO line coming in from
+botocore.
+
+Here's what the data looks like in psql::
+
+.. image:: psql_boto.png
+
+Instead of using grep, now you can do queries like:
+
+.. code:: sql
+
+    select *
+    from clepy_logtopg_demo_logs
+    where logger_name <@ 'botocore'
+    order by inserted desc limit 4;
+
+And there's a lot fancier tricks possible too!
 
 Now, how to use logtopg
 =======================
@@ -311,6 +337,12 @@ like that):
 .. code:: bash
 
   psql -c "delete from clepy_logtopg_demo_logs where inserted < current_timestamp - interval '7 days';"
+
+----
+
+You need to pay attention to what you log!  If you have sensitive data
+(credit card numbers, medical stuff, whatever), you might need to think
+about who can access your logs.
 
 History / Why / Inspiration
 ===========================

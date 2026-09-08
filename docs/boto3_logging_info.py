@@ -13,8 +13,7 @@ def configure_logging():
 
     yaml_style_config = textwrap.dedent("""
     version: 1
-
-    disable_existing_loggers: false
+    disable_existing_loggers: False
 
     root:
         level: WARNING
@@ -25,18 +24,29 @@ def configure_logging():
         mycode: &mycodelogging
             propagate: False
             level: DEBUG
-            handlers: [console]
+            handlers: [console, pg]
 
         botocore:
             propagate: False
             level: INFO
-            handlers: [console]
+            handlers: [console, pg]
 
     handlers:
         console:
             class: logging.StreamHandler
             level: DEBUG
             formatter: colorfmt
+
+        pg:
+            class:          logtopg.PGHandler
+            level:          DEBUG
+            log_table_name: clepy_logtopg_demo_logs
+            database:       clepy_logtopg_demo
+            host:           null
+            user:           matt
+            password:       null
+            port:           5432
+
 
     formatters:
 

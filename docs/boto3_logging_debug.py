@@ -13,8 +13,7 @@ def configure_logging():
 
     yaml_style_config = textwrap.dedent("""
     version: 1
-
-    disable_existing_loggers: false
+    disable_existing_loggers: False
 
     root:
         level: WARNING
