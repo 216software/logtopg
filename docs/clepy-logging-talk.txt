@@ -288,7 +288,7 @@ Use ltree to search logs
 Notice that in the screenshot, there's an INFO line coming in from
 botocore.
 
-Here's what the data looks like in psql::
+Here's what the data looks like in psql:
 
 .. image:: psql_boto.png
 
