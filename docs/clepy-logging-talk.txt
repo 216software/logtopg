@@ -8,13 +8,13 @@ How to use logging
 Assuming you have logging configured somewhere else, this is all you
 gotta do:
 
-..code:: python
+.. code:: python
 
     import logging
 
 And then either this (most of the time):
 
-..code:: python
+.. code:: python
 
    log = logging.getLogger(__name__)
 
@@ -129,7 +129,9 @@ You have three ways to do it (3rd is my fave):
     and filters
 
     See example_code_based_config.py for an example.  It has lines like
-    this: ..code:: python
+    this:
+
+.. code:: python
 
         h2 = logging.StreamHandler()
         h2.setLevel(logging.DEBUG)
@@ -137,7 +139,9 @@ You have three ways to do it (3rd is my fave):
         logging.root.addHandler(h2)
 
 2.  Load in a configparser-style cfg file. See fileconfig_example.py for
-    an example.  It looks like this: .. code:: python
+    an example.  It looks like this:
+
+.. code:: python
 
         import logging
         import logging.config
@@ -149,7 +153,9 @@ You have three ways to do it (3rd is my fave):
             logging.debug('This is a boring debug message.')
             logging.info('Here is an info message...')
 
-3.  Load in a dictionary from whatever config you want: .. code:: python
+3.  Load in a dictionary from whatever config you want:
+
+.. code:: python
 
         import logging
         import logging.config
@@ -227,15 +233,21 @@ This is the way I set up my logging system:
 Now, how to use logtopg
 =======================
 
-Install it with: .. code:: bash
+Install it with:
+
+.. code:: bash
 
   $ pip install logtopg
 
-Create a postgresql database and user for your logs::
+Create a postgresql database and user for your logs:
+
+.. code:: bash
 
     $ sudo -u postgres createdb --owner matt clepy_logtopg_demo
 
 Add the "ltree" extension (it's built-in, but not enabled):
+
+.. code:: bash
 
     $ sudo -u postgres psql -d clepy_logtopg_demo -c "create extension ltree;"
 
@@ -246,7 +258,9 @@ Other details
 =============
 
 You probably want to delete old logs in a daily cron job (or something
-like that)::
+like that):
+
+.. code:: bash
 
   psql -c "delete from clepy_logtopg_demo_logs where inserted < current_timestamp - interval '7 days';"
 
@@ -259,11 +273,12 @@ that string (and some of the details about the environment) into a
 database table.  A custom web app polled the database and displayed
 tables and charts of errors.
 
-This was sort of like a proto-sentry.  It worked great.
+This was sort of like a homemade version of sentry (getsentry.com).  It
+worked great!
 
 ----
 
-Later we worked on a different project where a linux box in a machine
+Later I worked on a different project where a linux box in a machine
 shop read data from dozens of sensors and recorded data every second at
 least.
 
@@ -271,8 +286,11 @@ We added a screen to the webapp that did something like this:
 
   $ tail -f app_log.txt | grep SENSOR | grep INFO
 
-And clients LOVED seeing the near-real-time logging data.  They trusted
-the system way more when they could watch the sensor data flow by.
+Except we pulled the data from a database, which made stuff like
+pagination much easier.
+
+Clients LOVED seeing the near-real-time logging data.  They trusted the
+system way more when they could watch the sensor data flow by.
 
 Old stuff I've written about logging
 ====================================
