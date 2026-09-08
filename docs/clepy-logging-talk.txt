@@ -6,44 +6,45 @@ How to use logging
 ==================
 
 Assuming you have logging configured somewhere else, this is all you
-gotta do::
+gotta do.  .. code:: python
 
-  import logging
+    import logging
 
-And then either this (most of the time)::
+And then either this (most of the time).  .. code:: python
 
-  log = logging.getLogger(__name__)
+   log = logging.getLogger(__name__)
 
 That __name__ will be something like "yourpackage.yourmodule" or
 "yourpackage.parentmodule.yourmodule".
 
 Or do this instead if you're in a script, because in a script, __name__
-will be "__main__"::
+will be "__main__".  .. code:: python
 
-  log = logging.getLogger("bogusproject.cronjobs.do_daily_chores")
+    log = logging.getLogger("bogusproject.cronjobs.do_daily_chores")
 
-And then after setting up that module-level variable, you just do this::
+And then after setting up that module-level variable, you just do this.
+.. code:: python
 
-  log.debug(f"Got {len(chores)} chores to do today")
+    log.debug(f"Got {len(chores)} chores to do today")
 
-Exceptions need a little bit of different handling::
+Exceptions need a little bit of different handling. .. code:: python
 
-  try:
-    do_something_risky()
-  except Exception as ex:
-    log.exception("It didn't work!")
+    try:
+      do_something_risky()
+    except Exception as ex:
+      log.exception("It didn't work!")
 
-Logs have these levels::
+Logs have these levels: .. code:: python
 
-  log.debug("Got this far and x is %s", x)
-  log.info("User %s just logged in", user)
-  log.warn("User %s is trying to access something they shouldn't!", user)
-  log.error("3rd party API unavailable; queueing data instead")
-  log.critical("I can'
+    log.debug("Got this far and x is %s", x)
+    log.info("User %s just logged in", user)
+    log.warn("User %s is trying to access something they shouldn't!", user)
+    log.error("3rd party API unavailable; queueing data instead")
+    log.critical("I can't recover from this!  Wake somebody up.")
 
-By the way, log.exception is the same as doing::
+By the way, log.exception is the same as doing: .. code:: python
 
-  log.error(..., exc_info=True)
+   log.error(..., exc_info=True)
 
 I have *opinions* about how and when to use the different levels:
 
@@ -85,13 +86,13 @@ Theoretically, logging slows down your code in two ways:
     times.
 
 2.  String interpolation is not free, so this is what you're supposed to
-    do::
+    do: .. code:: python
 
-      log.debug("Got this far and x is %s", x)
+        log.debug("Got this far and x is %s", x)
 
-    Rather than::
+    Rather than: .. code:: python
 
-      log.debug(f"Got this far and x is {x}".)
+        log.debug(f"Got this far and x is {x}".)
 
 In practice, I don't worry about it!
 
@@ -99,9 +100,9 @@ Tangent: python vs common lisp
 ==============================
 
 If python were as cool as (and as confusing as) common lisp, then there
-would be a way to say for this line::
+would be a way to say for this line: .. code:: python
 
-  log.debug(f"Got {len(chores)} chores to do today")
+    log.debug(f"Got {len(chores)} chores to do today")
 
 "Don't even evaluate the stuff inside debug(...) unless I tell you!"
 
@@ -122,7 +123,7 @@ You have three ways to do it (3rd is my fave):
     and filters
 
     See example_code_based_config.py for an example.  It has lines like
-    this::
+    this: ..code:: python
 
         h2 = logging.StreamHandler()
         h2.setLevel(logging.DEBUG)
@@ -130,7 +131,7 @@ You have three ways to do it (3rd is my fave):
         logging.root.addHandler(h2)
 
 2.  Load in a configparser-style cfg file. See fileconfig_example.py for
-    an example.  It looks like this::
+    an example.  It looks like this: .. code:: python
 
         import logging
         import logging.config
@@ -142,7 +143,7 @@ You have three ways to do it (3rd is my fave):
             logging.debug('This is a boring debug message.')
             logging.info('Here is an info message...')
 
-3.  Load in a dictionary from whatever config you want::
+3.  Load in a dictionary from whatever config you want: .. code:: python
 
         import logging
         import logging.config
@@ -181,7 +182,9 @@ Here's a yaml file with some redundant info.
       shirt: red
 
 With anchors and overrides, we can define the same thing with less
-work::
+work.
+
+.. code:: yaml
 
     # costumes-2.yaml
 
@@ -218,7 +221,7 @@ This is the way I set up my logging system:
 Now, how to use logtopg
 =======================
 
-Install it with::
+Install it with: .. code:: bash
 
   $ pip install logtopg
 
