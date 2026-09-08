@@ -6,11 +6,15 @@ How to use logging
 ==================
 
 Assuming you have logging configured somewhere else, this is all you
-gotta do.  ..code:: python
+gotta do:
+
+..code:: python
 
     import logging
 
-And then either this (most of the time).  ..code:: python
+And then either this (most of the time):
+
+..code:: python
 
    log = logging.getLogger(__name__)
 
@@ -18,7 +22,9 @@ That __name__ will be something like "yourpackage.yourmodule" or
 "yourpackage.parentmodule.yourmodule".
 
 Or do this instead if you're in a script, because in a script, __name__
-will be "__main__".  .. code:: python
+will be "__main__".
+
+.. code:: python
 
     log = logging.getLogger("bogusproject.cronjobs.do_daily_chores")
 
