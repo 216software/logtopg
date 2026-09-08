@@ -153,7 +153,9 @@ You have three ways to do it (3rd is my fave):
 Tangent: yaml anchors, aliases, and overrides
 =============================================
 
-Here's a yaml file with some redundant info::
+Here's a yaml file with some redundant info.
+
+.. code:: yaml
 
     # costumes-1.yaml
 
