@@ -74,7 +74,6 @@ the parent log object.
 Performance Costs of Logging
 ============================
 
-
 Theoretically, logging slows down your code in two ways:
 
 1.  Every log.debug(...) method call (or log.critical(...)) requires
@@ -85,9 +84,8 @@ Theoretically, logging slows down your code in two ways:
     making the code check what to do with log.debug messages a million
     times.
 
-2.  String interpolation is not free, so you can defer it to later.
-
-    This is what you're supposed to do::
+2.  String interpolation is not free, so this is what you're supposed to
+    do::
 
       log.debug("Got this far and x is %s", x)
 
@@ -95,7 +93,7 @@ Theoretically, logging slows down your code in two ways:
 
       log.debug(f"Got this far and x is {x}".)
 
-In practice, I dont't worry about it!
+In practice, I don't worry about it!
 
 Tangent: python vs common lisp
 ==============================
@@ -112,6 +110,8 @@ common lisp drives you mad).
 
 If you want to learn more, read "Practical Common Lisp" by Peter Siebel
 (free book online) here: https://gigamonkeys.com/book/
+
+It's a great book!
 
 How to configure logging
 ========================
@@ -142,25 +142,63 @@ You have three ways to do it (3rd is my fave):
             logging.debug('This is a boring debug message.')
             logging.info('Here is an info message...')
 
-3.  load in a dictionary that specifies logging
+3.  Load in a dictionary from whatever config you want::
 
-    See yaml_example.py for an example.  It looks like this::
+        import logging
+        import logging.config
 
         d = yaml.safe_load(yaml_style_config)
-
         logging.config.dictConfig(d)
 
-Tangent: Why I like yaml vs configparser-style configs
-======================================================
+Tangent: yaml anchors, aliases, and overrides
+=============================================
 
-I like yaml because it (unlike cfg files) allows anchors, aliases, and
-overrides.
+Here's a yaml file with some redundant info::
 
-See yaml_example_2.py for a fancier example.
+    # costumes-1.yaml
 
+    # This is Matt's costume
+    matt:
+      shoes: red
+      pants: red
+      belt: red
+      shirt: red
 
+    # Oswald wears costume same as Matt
+    oswald:
+      shoes: red
+      pants: red
+      belt: red
+      shirt: red
 
+    # Rudy does the same except different belt
+    rudy:
+      shoes: red
+      pants: red
+      belt: white
+      shirt: red
 
+With anchors and overrides, we can define the same thing with less
+work::
+
+    # costumes-2.yaml
+
+    matt: &mattcostume
+      shoes: red
+      pants: red
+      belt: red
+      shirt: red
+
+    # oswald wears same as matt
+    oswald: *mattcostume
+
+    # rudy is same but wears a white belt
+    rudy:
+      <<: *mattcostume
+      belt: white
+
+This means if we decide we are all switching to green shoes, we only
+need to update one place!
 
 My logging config
 =================
@@ -172,18 +210,8 @@ This is the way I set up my logging system:
 * database logs (INFO and up)
 * emails (CRITICAL)
 
-
-
-
-
-
-App logs logs vs library logs
-=============================
-
-Put the root logger at one level (I usually use INFO) and put your own
-app at DEBUG so that you can log your own app stuff differently than
-anything else.
-
+.. image:: yaml_example_stderr.png
+.. image:: logtopg_example.png
 
 Now, how to use logtopg
 =======================
@@ -196,33 +224,20 @@ Create a postgresql database and user for your logs::
 
     $ sudo -u postgres createdb --owner matt clepy_logtopg_demo
 
-Create a yaml file that configures logging.
+Add the "ltree" extension (it's built-in, but not enabled):
 
-Add code to load in the yaml file into a dictionary and then configure
-logging
+    $ sudo -u postgres psql -d clepy_logtopg_demo -c "create extension ltree;"
 
+Add code in your project to add logtopg to your handlers (use the
+yaml_example.py file if you want).
 
+Other details
+=============
 
+You probably want to delete old logs in a daily cron job (or something
+like that)::
 
-
-
-
-Add it to your config somehow
-
-Also, set up a cron job to delete old logs, like:
-
-  psql -c "delete from logs where inserted < current_timestamp - interval '7 days';"
-
-That will delete anything older than 7 days.  Rewrite it for whatever
-you want.
-
-Maybe you want to use autocommit on logs.  Maybe you want a separate
-database connection too, so that an app crash that triggers a rollback
-doesn't roll back the logs.
-
-Maybe you don't want to send DEBUG logs into your database, so that you
-don't fill it up.
-
+  psql -c "delete from clepy_logtopg_demo_logs where inserted < current_timestamp - interval '7 days';"
 
 History / Why / Inspiration
 ===========================
@@ -248,12 +263,8 @@ We added a screen to the webapp that did something like this:
 And clients LOVED seeing the near-real-time logging data.  They trusted
 the system way more when they could watch the sensor data flow by.
 
-
-
-
-
-Old stuff I've done about logging
-=================================
+Old stuff I've written about logging
+====================================
 
 * https://blog.tplus1.com/blog/2007/09/28/the-python-logging-module-is-much-better-than-print-statements/
 
