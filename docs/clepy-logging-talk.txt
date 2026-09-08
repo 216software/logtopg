@@ -5,114 +5,177 @@ How to use logging in general and how to store logs in a postgresql database
 How to use logging
 ==================
 
-First do this::
+Assuming you have logging configured somewhere else, this is all you
+gotta do::
 
   import logging
 
-And either this (most of the time):
+And then either this (most of the time)::
 
   log = logging.getLogger(__name__)
 
-Or this instead::
+That __name__ will be something like "yourpackage.yourmodule" or
+"yourpackage.parentmodule.yourmodule".
+
+Or do this instead if you're in a script, because in a script, __name__
+will be "__main__"::
 
   log = logging.getLogger("bogusproject.cronjobs.do_daily_chores")
-
-Use the string rather than __name__ when __name__ will evaluate to
-"__main__" (like when you run a script).
 
 And then after setting up that module-level variable, you just do this::
 
   log.debug(f"Got {len(chores)} chores to do today")
 
-Or maybe::
+Exceptions need a little bit of different handling::
 
   try:
     do_something_risky()
   except Exception as ex:
-    log.error("It didn't work!", exc_info=True)
+    log.exception("It didn't work!")
 
-f-strings always get evaluated
+Logs have these levels::
+
+  log.debug("Got this far and x is %s", x)
+  log.info("User %s just logged in", user)
+  log.warn("User %s is trying to access something they shouldn't!", user)
+  log.error("3rd party API unavailable; queueing data instead")
+  log.critical("I can'
+
+By the way, log.exception is the same as doing::
+
+  log.error(..., exc_info=True)
+
+I have *opinions* about how and when to use the different levels:
+
+* debug is for... debugging. don't spam your logs!
+
+* info tracks state-changing operations, like login, logout, charge a
+  credit card, etc.
+
+* warning is for stuff like "this method is deprecated; use fibityfoo()
+  instead"
+
+* errors are for caught exceptions
+
+* critical is for uncaught exceptions
+
+What happens inside log.debug(...) or whatever
+==============================================
+
+The "log" object is a logger.  Each logger has a parent logger and a
+list of handlers.  The log message gets sent to each handler, and if the
+log object has "propagate" == True, then the log message also goes up to
+the parent log object.
+
+.. image:: log-handlers.png
+
+.. image:: logging-multiple-handlers.jpg
+
+Performance Costs of Logging
+============================
+
+
+Theoretically, logging slows down your code in two ways:
+
+1.  Every log.debug(...) method call (or log.critical(...)) requires
+    checking the configuration to decide whether to emit this log
+    message.
+
+    If you add a million log.debug(...) calls in an API handler, you're
+    making the code check what to do with log.debug messages a million
+    times.
+
+2.  String interpolation is not free, so you can defer it to later.
+
+    This is what you're supposed to do::
+
+      log.debug("Got this far and x is %s", x)
+
+    Rather than::
+
+      log.debug(f"Got this far and x is {x}".)
+
+In practice, I dont't worry about it!
+
+Tangent: python vs common lisp
 ==============================
-
-If performance really, really matters, be aware that logs are adding
-time to your stack!
-
-All those::
-
-  log.debug(...)
-
-calls can be replaced with something like::
-
-   def do_nothing(*args, **kwargs):
-      pass
-
-  log.debug = do_nothing
-
-so that you're not running through the logging handlers system when you
-turned off debugs.
-
-However, it gets more complex::
-
-If len(chores) is why your code is slow, then both of these are still
-gonna be slow:
-
-  log.debug(f"I found {len(chores)} chores to do today")
-
-And::
-
-  log.debug("I found %s chores to do today", len(chores))
-
-However, be aware that the len(chores) part is still being evaluated!
-
-Why would len(chores) be slow?  Maybe chores is some ORM thingy that
-defined its __len__ method to do something like::
-
-  SELECT COUNT(*)
-  FROM CHORES
-  WHERE ...
 
 If python were as cool as (and as confusing as) common lisp, then there
 would be a way to say for this line::
 
-  log.debug("Got %s chores to do today", len(chores))
+  log.debug(f"Got {len(chores)} chores to do today")
 
 "Don't even evaluate the stuff inside debug(...) unless I tell you!"
 
 But we don't have that kind of power in python (and for good reason --
 common lisp drives you mad).
 
-Three ways to setup your logging system
-=======================================
+If you want to learn more, read "Practical Common Lisp" by Peter Siebel
+(free book online) here: https://gigamonkeys.com/book/
 
-It needs to be this way!
+How to configure logging
+========================
 
-1.  do lots of method calls
+You have three ways to do it (3rd is my fave):
 
-2.  load in a cfg file
+1.  Do method calls to build the loggers, handlers, formatters,
+    and filters
 
-3.  load in a dictionary
+    See example_code_based_config.py for an example.  It has lines like
+    this::
 
-My fave: use a yaml file (not a cfg file), convert it to a dictionary,
-then load in the dictionary as logging config.
+        h2 = logging.StreamHandler()
+        h2.setLevel(logging.DEBUG)
+        h2.setFormatter(fmt)
+        logging.root.addHandler(h2)
+
+2.  Load in a configparser-style cfg file. See fileconfig_example.py for
+    an example.  It looks like this::
+
+        import logging
+        import logging.config
+
+        if __name__ == '__main__':
+
+            logging.config.fileConfig("simple_example.cfg")
+
+            logging.debug('This is a boring debug message.')
+            logging.info('Here is an info message...')
+
+3.  load in a dictionary that specifies logging
+
+    See yaml_example.py for an example.  It looks like this::
+
+        d = yaml.safe_load(yaml_style_config)
+
+        logging.config.dictConfig(d)
+
+Tangent: Why I like yaml vs configparser-style configs
+======================================================
+
+I like yaml because it (unlike cfg files) allows anchors, aliases, and
+overrides.
+
+See yaml_example_2.py for a fancier example.
 
 
-How to configure logging like how I like
-========================================
 
-Stream handler to stderr with special colorfmt formatter (DEBUG and up)
 
-Rotating log file in /tmp (DEBUG and up)
 
-database logs (INFO and up)
+My logging config
+=================
 
-emails (CRITICAL)
+This is the way I set up my logging system:
 
-Configure the app to log DEBUG and up, root to handle WARNING and up.
+* Stream handler to stderr with special colorfmt formatter (DEBUG and up)
+* Rotating text file in /tmp (DEBUG and up)
+* database logs (INFO and up)
+* emails (CRITICAL)
 
-Logs are so important to me that I like having several copies going.
 
-How to log exceptions
-=====================
+
+
+
 
 App logs logs vs library logs
 =============================
@@ -125,7 +188,24 @@ anything else.
 Now, how to use logtopg
 =======================
 
-Install it
+Install it with::
+
+  $ pip install logtopg
+
+Create a postgresql database and user for your logs::
+
+    $ sudo -u postgres createdb --owner matt clepy_logtopg_demo
+
+Create a yaml file that configures logging.
+
+Add code to load in the yaml file into a dictionary and then configure
+logging
+
+
+
+
+
+
 
 Add it to your config somehow
 

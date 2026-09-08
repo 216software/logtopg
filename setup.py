@@ -26,6 +26,7 @@ setup(
 
     install_requires=[
         'psycopg>=3.0',
+        "psutil",
     ],
 
     # Are these not allowed any more?
