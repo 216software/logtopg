@@ -10,13 +10,20 @@ import warnings
 
 import psutil
 
-import pkg_resources
+import importlib.resources
 import psycopg2
 from psycopg2.extensions import adapt
 
 from logtopg.version import __version__
 
 log = logging.getLogger(__name__)
+
+# What psycopg2 raises when a connection is closed or broken: cursor()
+# on a closed connection is an InterfaceError, a query on a connection
+# the server dropped is an OperationalError, and a failed reconnect is
+# an OperationalError too.
+CONNECTION_ERRORS = (psycopg2.InterfaceError, psycopg2.OperationalError)
+
 
 class PGHandler(logging.Handler):
 
@@ -38,29 +45,29 @@ class PGHandler(logging.Handler):
         self.port = port
 
         self.pgconn = None
+        self.log_table_exists = False
         self.create_table_sql = None
         self.insert_row_sql = None
 
     def check_if_log_table_exists(self):
 
-        while (True):
-            pgconn = self.get_pgconn()
+        cursor = self.get_pgconn().cursor()
 
-            cursor = pgconn.cursor()
+        try:
+            cursor.execute("""
+            SELECT %s::regclass;
+            """, [self.log_table_name])
 
-            try:
-                cursor.execute("""
-                SELECT %s::regclass;
-                """, [self.log_table_name])
-            except psycopg2.ProgrammingError as e:
-                return False
-            except InterfaceError as ie:
-                self.pgconn = None
-                continue
+        except psycopg2.ProgrammingError as e:
+            return False
 
-            return True
+        return True
 
     def maybe_create_table(self):
+
+        # Only ask the database once per handler, not once per log line.
+        if self.log_table_exists:
+            return
 
         if not self.check_if_log_table_exists():
 
@@ -70,6 +77,8 @@ class PGHandler(logging.Handler):
                 self.host, self.port, self.database)
 
             log.info("Created log table {0}.".format(self.log_table_name))
+
+        self.log_table_exists = True
 
     def get_pgconn(self):
 
@@ -96,11 +105,10 @@ class PGHandler(logging.Handler):
 
         if not self.create_table_sql:
 
-            s = \
-            pkg_resources.resource_string(
-                "logtopg", "createtable.sql")\
-            .decode("utf-8")\
-            .format(self.log_table_name)
+            s = importlib.resources.files("logtopg") \
+                .joinpath("createtable.sql") \
+                .read_text(encoding="utf-8") \
+                .format(self.log_table_name)
 
             self.create_table_sql = s.encode("utf-8")
 
@@ -115,11 +123,10 @@ class PGHandler(logging.Handler):
 
         if not self.insert_row_sql:
 
-            self.insert_row_sql = \
-            pkg_resources.resource_string(
-                "logtopg", "insertrow.sql")\
-            .decode("utf-8")\
-            .format(self.log_table_name)
+            self.insert_row_sql = importlib.resources.files("logtopg") \
+                .joinpath("insertrow.sql") \
+                .read_text(encoding="utf-8") \
+                .format(self.log_table_name)
 
         return self.insert_row_sql
 
@@ -152,6 +159,31 @@ class PGHandler(logging.Handler):
 
         if isinstance(record.msg, Exception):
             record.msg = str(record.msg)
+
+        # A logging handler must never raise: an exception escaping
+        # emit() propagates out of the caller's log.info(...) and takes
+        # the caller down with it.  Standard-library handlers all route
+        # failures to handleError, which prints to stderr, and so do we.
+        try:
+            self.insert_row(record)
+
+        except CONNECTION_ERRORS:
+
+            # The cached connection died underneath us (postgres
+            # restart, idle timeout, network drop).  Throw it away and
+            # try once more on a fresh one.
+            self.pgconn = None
+
+            try:
+                self.insert_row(record)
+
+            except Exception:
+                self.handleError(record)
+
+        except Exception:
+            self.handleError(record)
+
+    def insert_row(self, record):
 
         pgconn = self.get_pgconn()
 
